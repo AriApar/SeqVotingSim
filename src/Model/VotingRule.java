@@ -8,4 +8,6 @@ public interface VotingRule {
     void vote(Preferences pref);
 
     int getWinner();
+
+    int[] getScores();
 }
