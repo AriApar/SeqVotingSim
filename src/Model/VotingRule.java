@@ -5,7 +5,7 @@ package Model;
  */
 public interface VotingRule {
 
-    int[] vote(Preferences pref);
+    void vote(Preferences pref);
 
     int getWinner();
 }

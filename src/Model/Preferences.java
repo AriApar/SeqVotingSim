@@ -16,4 +16,6 @@ public class Preferences {
     public int getNthPreference(int n) {
         return pref[n-1];
     }
+
+    public int length() { return pref.length; }
 }
