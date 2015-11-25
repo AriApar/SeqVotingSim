@@ -56,6 +56,10 @@ public class PluralityVR implements VotingRule {
         return scores.clone();
     }
 
+    public int getScore(int candidate) {
+        return scores[candidate-1];
+    }
+
 
     private void updateScore(int candidate, int rank) {
         assert ((rank != 0) || (candidate != 0));

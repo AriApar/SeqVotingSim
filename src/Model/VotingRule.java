@@ -10,4 +10,6 @@ public interface VotingRule {
     int getWinner();
 
     int[] getScores();
+
+    int getScore(int candidate);
 }
