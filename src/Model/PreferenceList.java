@@ -44,4 +44,8 @@ public class PreferenceList {
     public int getNthPreferenceOfVoter(int n, int voterId){
         return getPreferencesForVoter(voterId).getNthPreference(n);
     }
+
+    public int getNumCandidates() {
+        return alternatives;
+    }
 }

@@ -1,5 +1,6 @@
 package Testers;
 
+import Elections.TruthfulElection;
 import Model.*;
 import VotingRules.PluralityVR;
 

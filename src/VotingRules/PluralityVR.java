@@ -1,9 +1,11 @@
 package VotingRules;
 
 import Model.Preferences;
+import Model.ScoreVector;
 import Model.VotingRule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -14,24 +16,32 @@ import java.util.Random;
  */
 public class PluralityVR implements VotingRule {
 
-    private int[] scores;
-    private int[] scoringVector;
+    //private ScoreVector scores;
+    private ArrayList<Integer> scoringVector;
 
     public PluralityVR(int candidates) {
-        scores = new int[candidates];
-        scoringVector = new int[candidates];
-        scoringVector[0] = 1;
+        //scores = new ScoreVector(candidates);
+        scoringVector = new ArrayList<>(candidates);
+        for (int i = 0; i < candidates; i++) scoringVector.add(0);
+        scoringVector.set(0,1);
     }
 
     @Override
-    public void vote(Preferences pref) {
-        for (int rank = 1; rank <= pref.length(); rank++ ) {
-            int candidateNo = pref.getNthPreference(rank);
-            updateScore(candidateNo, rank);
-        }
+    public ScoreVector vote(Preferences pref) {
+        ScoreVector res = new ScoreVector(pref.length());
+        int candidateNo = pref.getNthPreference(1);
+        res.setCandidate(candidateNo, 1);
+        return res;
     }
 
     @Override
+    public ScoreVector vote(int candidate) {
+        ScoreVector res = new ScoreVector(scoringVector.size());
+        res.setCandidate(candidate, 1);
+        return res;
+    }
+
+    /*@Override
     public int getWinner() {
         ArrayList<Integer> winners = new ArrayList<>();
         int maxVotes = 0;
@@ -50,21 +60,5 @@ public class PluralityVR implements VotingRule {
             int winner = random.nextInt(winners.size());
             return winners.get(winner);
         }
-    }
-
-    public int[] getScores() {
-        return scores.clone();
-    }
-
-    public int getScore(int candidate) {
-        return scores[candidate-1];
-    }
-
-
-    private void updateScore(int candidate, int rank) {
-        assert ((rank != 0) || (candidate != 0));
-        if (scoringVector[rank-1] != 0)
-            scores[candidate-1] +=  scoringVector[rank-1];
-
-    }
+    }*/
 }

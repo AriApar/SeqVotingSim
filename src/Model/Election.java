@@ -3,10 +3,16 @@ package Model;
 /**
  * Created by AriApar on 25/11/2015.
  */
-public interface Election {
+public abstract class Election {
 
-    int run();
+    private PreferenceList pref;
+    private VotingOrder order;
+    private VotingRule rule;
 
-    int getScore(int candidate);
+    private ScoreVector scores;
+
+    public abstract int run();
+
+    public abstract int getScore(int candidate);
 
 }

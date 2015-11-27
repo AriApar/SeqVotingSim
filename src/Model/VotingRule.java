@@ -5,11 +5,8 @@ package Model;
  */
 public interface VotingRule {
 
-    void vote(Preferences pref);
+    public ScoreVector vote(Preferences pref);
 
-    int getWinner();
+    public ScoreVector vote(int candidate);
 
-    int[] getScores();
-
-    int getScore(int candidate);
 }
