@@ -52,4 +52,8 @@ public class VotingOrder implements Iterable<Integer> {
 
         return it;
     }
+
+    public boolean isLastVoter(int voterId) {
+        return voteOrder[voteOrder.length -1] == voterId;
+    }
 }

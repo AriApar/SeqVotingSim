@@ -1,5 +1,7 @@
 package util;
 
+import Model.Election;
+
 import java.util.ArrayList;
 
 /**
@@ -23,8 +25,8 @@ public class Node<T> {
         return data;
     }
 
-    public void addChildWithData(T data) {
-        children.add(new Node<T>(data));
+    public Node<T> addChildWithData(T data) {
+        Node<T> child = new Node<T>(data); children.add(child); return child;
     }
 
     public void addChild(Node<T> childNode) {
@@ -38,5 +40,7 @@ public class Node<T> {
     public ArrayList<Node<T>> getChildren(){
         return children;
     }
+
+    public void removeChild(Node<T> child) { children.remove(child); }
 
 }

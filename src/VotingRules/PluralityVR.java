@@ -42,14 +42,14 @@ public class PluralityVR implements VotingRule {
     }
 
     /*@Override
-    public int getWinner() {
+    public int getWinners(ScoreVector scores) {
         ArrayList<Integer> winners = new ArrayList<>();
         int maxVotes = 0;
-        for (int candidate = 1; candidate <= scores.length; candidate++) {
-            if (scores[candidate-1] > maxVotes) {
-                winners.clear(); winners.add(candidate); maxVotes = scores[candidate-1];
+        for (int candidate = 1; candidate <= scores.getLength(); candidate++) {
+            if (scores.getCandidate(candidate) > maxVotes) {
+                winners.clear(); winners.add(candidate); maxVotes = scores.getCandidate(candidate);
             }
-            else if (scores[candidate-1] == maxVotes) {
+            else if (scores.getCandidate(candidate) == maxVotes) {
                 winners.add(candidate);
             }
         }
