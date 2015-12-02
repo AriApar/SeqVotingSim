@@ -1,6 +1,7 @@
 package Model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by AriApar on 26/11/2015.
@@ -27,6 +28,15 @@ public class ScoreVector {
         }
     }
 
+    public ScoreVector addImmutable(ScoreVector voteVector) {
+        assert voteVector.getLength() == scores.length;
+        int[] resArr = new int[scores.length];
+        for (int i = 0; i < scores.length; i++) {
+            resArr[i] = scores[i] + voteVector.get(i);
+        }
+        return new ScoreVector(resArr);
+    }
+
     public int getLength() {
         return scores.length;
     }
@@ -44,6 +54,30 @@ public class ScoreVector {
     public void set(int index, int value) {
         assert index >= 0 && index < scores.length;
         scores[index] = value;
+    }
+
+    public ScoreVector cloneAndSet(int index, int value) {
+        assert index >= 0 && index < scores.length;
+        int[] resArr = scores.clone();
+        resArr[index] = value;
+        return new ScoreVector(resArr);
+    }
+
+    public int[] getRepresentation() {
+        return scores.clone();
+    }
+
+    @Override
+    public int hashCode() {
+        return scores.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ScoreVector)) return false;
+        ScoreVector that = (ScoreVector) obj;
+        return Arrays.equals(scores, that.scores);
     }
 
     public void setCandidate(int candidate, int value) {

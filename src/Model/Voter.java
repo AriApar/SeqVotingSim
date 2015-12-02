@@ -46,6 +46,15 @@ public class Voter {
         return pref.length() - rank;
     }
 
+    public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) {
+        double res = 0D;
+        for (Integer c : candidates) {
+            res += (double) getPreference(c);
+        }
+        res = res / (double) candidates.size();
+        return res;
+    }
+
     public void chooseWhoToVote(Tree<ElectionState> root, int nthToVote) {
         int level = nthToVote -1;
         ArrayList<Node<ElectionState>> currLevel = root.getNodesAtLevel(level);

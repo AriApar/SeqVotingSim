@@ -15,7 +15,7 @@ public abstract class Election {
 
     public ScoreVector scores;
 
-    public abstract int run();
+    public abstract int run() throws Exception;
 
     public ArrayList<Integer> getWinners(ScoreVector scores) {
         ArrayList<Integer> winners = new ArrayList<>();

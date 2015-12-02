@@ -35,6 +35,10 @@ public class TruthfulVotingTester {
             int winner = e.run();
             System.out.println("The winner is candidate " + winner +
                                 " with " + e.getScore(winner) + " votes!");
+            System.out.println("Distribution of Votes:");
+            for (int i = 1; i <= pref.getNumCandidates(); i++) {
+                System.out.println("Candidate " + i + ": " + e.getScores().getCandidate(i) + " votes.");
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

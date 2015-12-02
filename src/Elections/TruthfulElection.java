@@ -10,10 +10,10 @@ import java.util.Random;
  */
 public class TruthfulElection extends Election {
 
-    private PreferenceList pref;
-    private ArrayList<Voter> voters;
-    private VotingRule rule;
-    private ScoreVector scores;
+    //private PreferenceList pref;
+    //private ArrayList<Voter> voters;
+    //private VotingRule rule;
+    //private ScoreVector scores;
 
     public TruthfulElection(PreferenceList pref, VotingOrder order, VotingRule rule) {
         this.pref = pref;
