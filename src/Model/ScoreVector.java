@@ -69,7 +69,7 @@ public class ScoreVector {
 
     @Override
     public int hashCode() {
-        return scores.hashCode();
+        return Arrays.hashCode(scores) * 31;
     }
 
     @Override
@@ -83,6 +83,11 @@ public class ScoreVector {
     public void setCandidate(int candidate, int value) {
         assert candidate > 0 && candidate <= scores.length;
         scores[candidate-1] = value;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(scores);
     }
 
 }

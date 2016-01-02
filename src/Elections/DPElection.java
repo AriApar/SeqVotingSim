@@ -2,10 +2,7 @@ package Elections;
 
 import Model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by AriApar on 01/12/2015.
@@ -26,27 +23,32 @@ public class DPElection extends Election{
 
     @Override
     public int run() throws Exception {
-        throw new Exception("YOU WERE SUPPOSED TO USE runNH!");
+        throw new Exception("YOU WERE SUPPOSED TO USE runNE!");
 
     }
-    public Set<ArrayList<Integer>> runNE() {
+    public Set<ArrayList<Integer>> runNE() throws Exception{
+        int counter = 0; //call counter to g.put
         HashMap<ScoreVector, LinkedHashSet<ArrayList<Integer>>> g = new HashMap<>();
         int numAlternatives = pref.getNumCandidates();
+        int numVoters = voters.size();
         int numAltFactorial = factorial(numAlternatives);
         final ArrayList<ScoreVector> EVector = generateEVectors(numAltFactorial);
-        for (int j = numAlternatives +1; j >=1; j--) {
-            ArrayList<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
+        for (int j = numVoters +1; j >=1; j--) {
+            Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
             for (ScoreVector s : states) {
-                if (j == numAlternatives + 1) {
+                if (j == numVoters + 1) {
+                    //System.out.println(s);
                     LinkedHashSet<ArrayList<Integer>> winnerSet = new LinkedHashSet<>();
-                    winnerSet.add(rule.getWinnersOfPrefVectors(s));
-                    g.put(s, winnerSet);
+                    winnerSet.add(rule.getWinnersOfPrefVectors(s, numAlternatives));
+                    g.put(s, winnerSet); //counter++;
                 }
-                else if (j < numAlternatives + 1) {
+                else {
+                    //System.out.println(g.size());
                     double bestPref = Double.MAX_VALUE;
                     ArrayList<ScoreVector> optimum_e = new ArrayList<>();
                     for (ScoreVector e : EVector) {
                         ScoreVector gSum = s.addImmutable(e);
+                        //System.out.println(gSum);
                         ArrayList<Integer> cWinners = g.get(gSum).iterator().next();
                         //because we only need the rank of the current winners, getting only one is fine as
                         //all winners will have same rank if they're all optimal
@@ -64,17 +66,19 @@ public class DPElection extends Election{
                     for (ScoreVector e : optimum_e) {
                         ScoreVector sPlusE = s.addImmutable(e);
                         LinkedHashSet<ArrayList<Integer>> g_of_sPlusE = g.get(sPlusE);
-                        if(!g.containsKey(s)) {
-                            g_of_sPlusE.addAll(g.get(s));
-                            g.put(s, g_of_sPlusE);
+                        if(g.containsKey(s)) {
+                            //System.out.println(s.toString());
+                            for (ArrayList<Integer> item : g.get(s)) g_of_sPlusE.add(item);
+                            g.put(s, g_of_sPlusE); counter++;
                         }
                         else {
-                            g.put(s, g_of_sPlusE);
+                            g.put(s, g_of_sPlusE); //counter++;
                         }
                     }
                 }
             }
         }
+        System.out.println(counter);
         return g.get(generateZeroVector(numAltFactorial));
     }
 
@@ -88,15 +92,33 @@ public class DPElection extends Election{
         return res;
     }
 
-    private ArrayList<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
+    /*
+    private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
+        assert (level >= 1);
+        Set<ScoreVector> scores = new HashSet<ScoreVector>();
+        scores.add(new ScoreVector(new int[size]));
+        for (int i = 2; i <=level; i++) {
+            Set<ScoreVector> nextScores = new HashSet<>(scores.size()*size);
+            for (ScoreVector s : scores) {
+                for (int j = 0; j < size; j++) {
+                    nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
+                }
+            }
+            scores = nextScores;
+        }
+        return scores;
+    }
+    */
+
+    private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         if (level == 1) {
-            ArrayList<ScoreVector> s = new ArrayList<>();
+            Set<ScoreVector> s = new HashSet<>();
             s.add(new ScoreVector(new int[size]));
             return s;
         }
         else {
-            ArrayList<ScoreVector> scoreSet = generatePossibleScoresAtLevel(level - 1, size);
-            ArrayList<ScoreVector> resSet = new ArrayList<>(scoreSet.size()*size);
+            Set<ScoreVector> scoreSet = generatePossibleScoresAtLevel(level - 1, size);
+            Set<ScoreVector> resSet = new HashSet<>(scoreSet.size()*size);
             for (ScoreVector s : scoreSet) {
                 for (int i = 0; i < size; i++) {
                     resSet.add(s.cloneAndSet(i, s.get(i) + 1));

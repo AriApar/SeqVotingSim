@@ -1,22 +1,28 @@
 package Testers;
 
 import Elections.BackInductionElection;
-import Elections.TruthfulElection;
-import Model.*;
+import Elections.DPElection;
+import Model.Election;
+import Model.PreferenceList;
+import Model.VotingOrder;
+import Model.VotingRule;
 import VotingRules.PluralityVR;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
- * Created by AriApar on 30/11/2015.
+ * Created by AriApar on 02/12/2015.
  */
-public class BackInductionVotingTester {
+public class DPVotingTester {
 
     public static void main(String[] args) throws Exception{
         try {
-            Scanner in = new Scanner(getFile("SmallPListSample"));
+            Scanner in = new Scanner(getFile("3x3Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];
@@ -30,14 +36,17 @@ public class BackInductionVotingTester {
             VotingOrder order = new VotingOrder(voters, true);
             VotingRule rule = new PluralityVR(candidates);
 
-            Election e = new BackInductionElection(pref, order, rule);
+            DPElection e = new DPElection(pref, order, rule);
 
-            int winner = e.run();
-            System.out.println("The winner is candidate " + winner +
-                    " with " + e.getScore(winner) + " votes!");
-            System.out.println("Distribution of Votes:");
-            for (int i = 1; i <= pref.getNumCandidates(); i++) {
-                System.out.println("Candidate " + i + ": " + e.getScores().getCandidate(i) + " votes.");
+            Set<ArrayList<Integer>> winners = e.runNE();
+            System.out.println("This election has " + winners.size() +
+                    " Nash equilibria!");
+            Iterator<ArrayList<Integer>> it = winners.iterator();
+            for (int i = 1; i<= winners.size(); i++) {
+                System.out.println("Nash Equilibrium " + i + ":");
+                System.out.print("The winner is candidate(s) ");
+                ArrayList<Integer> wins = it.next();
+                for (int j = 0; j < wins.size(); j++) System.out.println(wins.get(j) + ", ");
             }
 
         } catch (FileNotFoundException e) {

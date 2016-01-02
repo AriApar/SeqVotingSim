@@ -40,22 +40,24 @@ public class Voter {
         return preferenceList.getNthPreferenceOfVoter(preference, voterId);
     }
 
-    public int getUtilityForCandidate(int candidate) {
+    public int getUtilityForCandidate(int candidate) throws Exception {
         Preferences pref = preferenceList.getPreferencesForVoter(voterId);
         int rank = pref.getPreferenceOfCandidate(candidate);
         return pref.length() - rank;
     }
 
-    public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) {
+    public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) throws Exception {
+        assert (candidates.size() != 0);
         double res = 0D;
+        Preferences pref = preferenceList.getPreferencesForVoter(voterId);
         for (Integer c : candidates) {
-            res += (double) getPreference(c);
+            res += (double) pref.getPreferenceOfCandidate(c);
         }
         res = res / (double) candidates.size();
         return res;
     }
 
-    public void chooseWhoToVote(Tree<ElectionState> root, int nthToVote) {
+    public void chooseWhoToVote(Tree<ElectionState> root, int nthToVote) throws Exception {
         int level = nthToVote -1;
         ArrayList<Node<ElectionState>> currLevel = root.getNodesAtLevel(level);
         for (Node<ElectionState> currNode : currLevel) {
@@ -63,7 +65,7 @@ public class Voter {
         }
     }
 
-    private void keepBestChild(Node<ElectionState> node) {
+    private void keepBestChild(Node<ElectionState> node) throws Exception {
         ArrayList<Node<ElectionState>> children = node.getChildren();
         Node<ElectionState> bestChild = null;
         for (Node<ElectionState> child : children) {
@@ -86,7 +88,7 @@ public class Voter {
         }
     }
 
-    private boolean isBetter(Node<ElectionState> candidate, Node<ElectionState> currBest) {
+    private boolean isBetter(Node<ElectionState> candidate, Node<ElectionState> currBest) throws Exception {
         ArrayList<Integer> cWinners = candidate.getData().getCurrentWinners();
         ArrayList<Integer> bWinners = currBest.getData().getCurrentWinners();
 

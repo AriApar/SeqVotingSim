@@ -32,7 +32,7 @@ public class PreferenceList {
         this.voters = prefList.length;
 
         this.preferenceList = new ArrayList<>(voters);
-        for (int i = 0; i<prefList.length; i++) {
+        for (int i = 0; i<voters; i++) {
             preferenceList.add(new Preferences(prefList[i]));
         }
     }

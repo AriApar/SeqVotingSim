@@ -28,7 +28,7 @@ public class BackInductionElection extends Election {
     }
 
     @Override
-    public int run() {
+    public int run() throws Exception{
         Tree<ElectionState> root = generateGameTree();
         //shallow cloning is fine, voters are immutable objects.
         ArrayList<Voter> revVoters = new ArrayList<>(voters);

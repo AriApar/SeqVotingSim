@@ -23,7 +23,10 @@ public class Preferences {
 
     public int length() { return pref.size(); }
 
-    public int getPreferenceOfCandidate(int candidate) {
-        return Collections.binarySearch(pref, candidate) +1;
+    public int getPreferenceOfCandidate(int candidate) throws Exception {
+        int index = 0;
+        while (index < alternatives && pref.get(index) != candidate ) index++;
+        if (index == alternatives) throw new Exception("candidateID given to getPrefOfCand not in Preferences");
+        return index + 1;
     }
 }
