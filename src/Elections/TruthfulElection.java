@@ -27,7 +27,7 @@ public class TruthfulElection extends Election {
 
     public int run() {
         for(Voter v : voters) {
-            scores.add(v.vote());
+            scores = scores.addImmutable(v.vote());
         }
 
         return getUniqueWinner();

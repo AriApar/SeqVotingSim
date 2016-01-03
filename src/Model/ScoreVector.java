@@ -5,6 +5,9 @@ import java.util.Arrays;
 
 /**
  * Created by AriApar on 26/11/2015.
+ *
+ * Immutable ScoreVector
+ *
  */
 public class ScoreVector {
 
@@ -21,12 +24,12 @@ public class ScoreVector {
         //this.numCandidates = scores.size();
     }
 
-    public void add(ScoreVector voteVector) {
+    /*public void add(ScoreVector voteVector) {
         assert voteVector.getLength() == scores.length;
         for (int i = 0; i < scores.length; i++) {
             scores[i] += voteVector.get(i);
         }
-    }
+    }*/
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
         assert voteVector.getLength() == scores.length;
@@ -51,10 +54,10 @@ public class ScoreVector {
         return scores[candidate-1];
     }
 
-    public void set(int index, int value) {
+    /*public void set(int index, int value) {
         assert index >= 0 && index < scores.length;
         scores[index] = value;
-    }
+    }*/
 
     public ScoreVector cloneAndSet(int index, int value) {
         assert index >= 0 && index < scores.length;
@@ -80,9 +83,9 @@ public class ScoreVector {
         return Arrays.equals(scores, that.scores);
     }
 
-    public void setCandidate(int candidate, int value) {
+    public ScoreVector cloneAndSetCandidate(int candidate, int value) {
         assert candidate > 0 && candidate <= scores.length;
-        scores[candidate-1] = value;
+        return cloneAndSet(candidate-1, value);
     }
 
     @Override

@@ -57,7 +57,7 @@ public class BackInductionElection extends Election {
                 for (int i = 1; i <= numCandidates; i++) {
                     int candidate = v.getPreference(i);
                     ScoreVector s = v.voteForPreference(i);
-                    s.add(currNode.getData().getCurrentScores());
+                    s = s.addImmutable(currNode.getData().getCurrentScores());
                     ElectionState newState = new ElectionState(s,getWinners(s),candidate);
                     //add as the child of currNode
                     Node<ElectionState> child = currNode.addChildWithData(newState);

@@ -30,14 +30,14 @@ public class PluralityVR implements VotingRule {
     public ScoreVector vote(Preferences pref) {
         ScoreVector res = new ScoreVector(pref.length());
         int candidateNo = pref.getNthPreference(1);
-        res.setCandidate(candidateNo, 1);
+        res = res.cloneAndSetCandidate(candidateNo, 1);
         return res;
     }
 
     @Override
     public ScoreVector vote(int candidate) {
         ScoreVector res = new ScoreVector(scoringVector.size());
-        res.setCandidate(candidate, 1);
+        res = res.cloneAndSetCandidate(candidate, 1);
         return res;
     }
 
