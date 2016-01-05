@@ -22,8 +22,12 @@ public class Tree<T> {
             for (Node<T> currNode : currLevel) {
                 nextLevel.addAll(currNode.getChildren());
             }
-            currLevel = nextLevel;
+            currLevel.clear(); currLevel.addAll(nextLevel);
         }
         return currLevel;
+    }
+
+    public Node<T> getRoot() {
+        return root;
     }
 }

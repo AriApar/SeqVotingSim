@@ -5,6 +5,7 @@ import util.Tree;
 
 import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.Iterator;
 
 /**
  * Created by AriApar on 26/11/2015.
@@ -43,7 +44,7 @@ public class Voter {
     public int getUtilityForCandidate(int candidate) throws Exception {
         Preferences pref = preferenceList.getPreferencesForVoter(voterId);
         int rank = pref.getPreferenceOfCandidate(candidate);
-        return pref.length() - rank;
+        return (pref.length() - rank);
     }
 
     public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) throws Exception {
@@ -57,38 +58,60 @@ public class Voter {
         return res;
     }
 
-    public void chooseWhoToVote(Tree<ElectionState> root, int nthToVote) throws Exception {
+    public Tree<ElectionState> chooseWhoToVote(Tree<ElectionState> root, int nthToVote) throws Exception {
         int level = nthToVote -1;
         ArrayList<Node<ElectionState>> currLevel = root.getNodesAtLevel(level);
         for (Node<ElectionState> currNode : currLevel) {
-            keepBestChild(currNode);
+            ArrayList<Node<ElectionState>> toRemove = keepBestChild(currNode);
+            currNode.removeChildren(toRemove);
+            System.out.print("");
         }
+        return new Tree(root.getRoot());
     }
 
-    private void keepBestChild(Node<ElectionState> node) throws Exception {
+    private ArrayList<Node<ElectionState>> keepBestChild(Node<ElectionState> node) throws Exception {
         ArrayList<Node<ElectionState>> children = node.getChildren();
+        ArrayList<Node<ElectionState>> toRemove = new ArrayList<>();
+        Node<ElectionState> bestLeaf = null;
         Node<ElectionState> bestChild = null;
         for (Node<ElectionState> child : children) {
             //go to the end of its branch to see what the result is
-            while (child.hasChild()) {
-                ArrayList<Node<ElectionState>> chList = child.getChildren();
-                assert chList.size() == 1;
-                child = chList.get(0);
+            Node<ElectionState> cLeaf = child;
+            while (cLeaf.hasChild()) {
+                ArrayList<Node<ElectionState>> chList = cLeaf.getChildren();
+                //assert (chList.size() == 10);
+                cLeaf = chList.get(0);
             }
             //check if this child is better than current best
             //if so, remove old best from children list, make this the best
             //otherwise, remove child from children list
-            if (bestChild == null || isBetter(child, bestChild)) {
-                if (bestChild != null) node.removeChild(bestChild);
-                bestChild = child;
+            if (bestLeaf == null || isBetter(cLeaf, bestLeaf) > 0) {
+                if (bestLeaf != null) toRemove.add(bestChild);//node.removeChild(bestChild);
+                bestChild = child; bestLeaf = cLeaf;
+            }
+            else if (isBetter(cLeaf, bestLeaf) == 0) {
+                //same rank child
+                //keep the one which you like the most
+                int cCand = child.getData().getVoteCast();
+                int bCand = bestChild.getData().getVoteCast();
+                if (getUtilityForCandidate(cCand) > getUtilityForCandidate(bCand)) {
+                    toRemove.add(bestChild);
+                }
+                else {
+                    toRemove.add(child);
+                }
+                //if no difference in between the two candidates, leave them be
             }
             else {
-                node.removeChild(child);
+                //worse, remove child
+                toRemove.add(child); //node.removeChild(child);
             }
         }
+        return toRemove;
     }
 
-    private boolean isBetter(Node<ElectionState> candidate, Node<ElectionState> currBest) throws Exception {
+    //returns 0 if same, >0 if better, <0 if worse
+    private int isBetter(Node<ElectionState> candidate, Node<ElectionState> currBest) throws Exception {
         ArrayList<Integer> cWinners = candidate.getData().getCurrentWinners();
         ArrayList<Integer> bWinners = currBest.getData().getCurrentWinners();
 
@@ -105,7 +128,7 @@ public class Voter {
         cSum = cSum / (double) (cWinners.size());
         bSum = bSum / (double) (bWinners.size());
 
-        return Double.compare(cSum, bSum) > 0;
+        return Double.compare(cSum, bSum);
         //TODO: THIS CAUSES THE CODE TO RETURN ONLY ONE SG-P NASH EQ, FIX THIS
     }
 

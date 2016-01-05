@@ -17,6 +17,14 @@ public abstract class Election {
 
     public abstract int run() throws Exception;
 
+    public ArrayList<ArrayList<Integer>> getNEs(ArrayList<ScoreVector> scoress) {
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        for (ScoreVector score : scoress) {
+            res.add(getWinners(score));
+        }
+        return res;
+    }
+
     public ArrayList<Integer> getWinners(ScoreVector scores) {
         ArrayList<Integer> winners = new ArrayList<>();
         int maxVotes = 0;

@@ -2,10 +2,7 @@ package Testers;
 
 import Elections.BackInductionElection;
 import Elections.DPElection;
-import Model.Election;
-import Model.PreferenceList;
-import Model.VotingOrder;
-import Model.VotingRule;
+import Model.*;
 import VotingRules.PluralityVR;
 
 import java.io.File;
@@ -22,7 +19,7 @@ public class DPVotingTester {
 
     public static void main(String[] args) throws Exception{
         try {
-            Scanner in = new Scanner(getFile("3x3Sample"));
+            Scanner in = new Scanner(getFile("SmallPListSample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];
@@ -38,7 +35,7 @@ public class DPVotingTester {
 
             DPElection e = new DPElection(pref, order, rule);
 
-            Set<ArrayList<Integer>> winners = e.runNE();
+            Set<ArrayList<Integer>> winners = e.findNE();
             System.out.println("This election has " + winners.size() +
                     " Nash equilibria!");
             Iterator<ArrayList<Integer>> it = winners.iterator();
@@ -47,6 +44,7 @@ public class DPVotingTester {
                 System.out.print("The winner is candidate(s) ");
                 ArrayList<Integer> wins = it.next();
                 for (int j = 0; j < wins.size(); j++) System.out.println(wins.get(j) + ", ");
+                //System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
             }
 
         } catch (FileNotFoundException e) {

@@ -23,10 +23,10 @@ public class DPElection extends Election{
 
     @Override
     public int run() throws Exception {
-        throw new Exception("YOU WERE SUPPOSED TO USE runNE!");
-
+        throw new Exception("YOU WERE SUPPOSED TO USE findNE!");
+        //return findNE();
     }
-    public Set<ArrayList<Integer>> runNE() throws Exception{
+    public Set<ArrayList<Integer>> findNE() throws Exception{
         int counter = 0; //call counter to g.put
         HashMap<ScoreVector, LinkedHashSet<ArrayList<Integer>>> g = new HashMap<>();
         int numAlternatives = pref.getNumCandidates();

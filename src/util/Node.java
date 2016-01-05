@@ -43,4 +43,26 @@ public class Node<T> {
 
     public void removeChild(Node<T> child) { children.remove(child); }
 
+    public void removeChildren(ArrayList<Node<T>> childs) {
+        children.removeAll(childs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node<?> node = (Node<?>) o;
+
+        if (data != null ? !data.equals(node.data) : node.data != null) return false;
+        return children != null ? children.equals(node.children) : node.children == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = data != null ? data.hashCode() : 0;
+        result = 31 * result + (children != null ? children.hashCode() : 0);
+        return result;
+    }
 }

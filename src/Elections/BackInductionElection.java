@@ -35,12 +35,35 @@ public class BackInductionElection extends Election {
         Collections.reverse(revVoters);
         for (int i = 0 ; i < revVoters.size(); i++) {
             Voter v = revVoters.get(i);
+            //voter v gets to vote on level revVoters.size() - i
+            //we expect this to modify the tree represented by root
             v.chooseWhoToVote(root, revVoters.size() - i);
         }
-        // at this point the tree consists of only one branch, get the end result of that
+        // at this point the tree consists of only winners
         ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
         scores = resList.get(0).getData().getCurrentScores();
+
         return getUniqueWinner(scores);
+    }
+
+    public ArrayList<ElectionState> findNE() throws Exception {
+        Tree<ElectionState> root = generateGameTree();
+        //shallow cloning is fine, voters are immutable objects.
+        ArrayList<Voter> revVoters = new ArrayList<>(voters);
+        Collections.reverse(revVoters);
+        for (int i = 0 ; i < revVoters.size(); i++) {
+            Voter v = revVoters.get(i);
+            //voter v gets to vote on level revVoters.size() - i
+            //we expect this to modify the tree represented by root
+            root = v.chooseWhoToVote(root, revVoters.size() - i);
+        }
+        // at this point the tree consists of only winners
+        ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
+        ArrayList<ElectionState> winnerArray = new ArrayList<>();
+        for (Node<ElectionState> winnerNode : resList)
+            winnerArray.add(winnerNode.getData());
+
+        return winnerArray;
     }
 
     private Tree<ElectionState> generateGameTree() {
