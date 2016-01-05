@@ -15,6 +15,19 @@ public class BackInductionElection extends Election {
     //private ArrayList<Voter> voters;
     //private VotingRule rule;
     //private ScoreVector scores;
+    private boolean abstention = false;
+    private boolean cost = false;
+
+    public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule, boolean abstention, boolean cost) {
+        this(pref, order, rule);
+        this.abstention = abstention;
+        this.cost = cost;
+    }
+
+    public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule, boolean abstention) {
+        this(pref, order, rule);
+        this.abstention = abstention;
+    }
 
     public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule) {
         this.pref = pref;
@@ -27,9 +40,11 @@ public class BackInductionElection extends Election {
         scores = new ScoreVector(pref.getNumCandidates());
     }
 
+
     @Override
     public int run() throws Exception{
-        Tree<ElectionState> root = generateGameTree();
+
+        Tree<ElectionState> root = abstention ? generateGameTreeAbs() : generateGameTree();
         //shallow cloning is fine, voters are immutable objects.
         ArrayList<Voter> revVoters = new ArrayList<>(voters);
         Collections.reverse(revVoters);
@@ -37,7 +52,7 @@ public class BackInductionElection extends Election {
             Voter v = revVoters.get(i);
             //voter v gets to vote on level revVoters.size() - i
             //we expect this to modify the tree represented by root
-            v.chooseWhoToVote(root, revVoters.size() - i);
+            v.chooseWhoToVote(root, revVoters.size() - i, cost);
         }
         // at this point the tree consists of only winners
         ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
@@ -47,7 +62,7 @@ public class BackInductionElection extends Election {
     }
 
     public ArrayList<ElectionState> findNE() throws Exception {
-        Tree<ElectionState> root = generateGameTree();
+        Tree<ElectionState> root = abstention ? generateGameTreeAbs() : generateGameTree();
         //shallow cloning is fine, voters are immutable objects.
         ArrayList<Voter> revVoters = new ArrayList<>(voters);
         Collections.reverse(revVoters);
@@ -55,7 +70,7 @@ public class BackInductionElection extends Election {
             Voter v = revVoters.get(i);
             //voter v gets to vote on level revVoters.size() - i
             //we expect this to modify the tree represented by root
-            root = v.chooseWhoToVote(root, revVoters.size() - i);
+            root = v.chooseWhoToVote(root, revVoters.size() - i, cost);
         }
         // at this point the tree consists of only winners
         ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
@@ -87,6 +102,40 @@ public class BackInductionElection extends Election {
                     //add this to next Level to be checked by next voter
                     nextLevel.add(child);
                 }
+            }
+            currLevel = nextLevel;
+        }
+        //game tree generated, clean up currLevel just in case, return root
+        currLevel = null;
+        return new Tree(root);
+    }
+
+    private Tree<ElectionState> generateGameTreeAbs() {
+        int numCandidates = pref.getNumCandidates();
+        ElectionState initState = new ElectionState(numCandidates);
+        Node<ElectionState> root = new Node<ElectionState>(initState);
+        Queue<Node<ElectionState>> currLevel = new LinkedList<>();
+        currLevel.add(root);
+        for (Voter v : voters) {
+            Queue<Node<ElectionState>> nextLevel = new LinkedList<>();
+            while (currLevel.peek() != null) {
+                Node<ElectionState> currNode = currLevel.remove();
+                //generate all possible states on all possible votes of v
+                for (int i = 1; i <= numCandidates; i++) {
+                    int candidate = v.getPreference(i);
+                    ScoreVector s = v.voteForPreference(i);
+                    s = s.addImmutable(currNode.getData().getCurrentScores());
+                    ElectionState newState = new ElectionState(s,getWinners(s),candidate);
+                    //add as the child of currNode
+                    Node<ElectionState> child = currNode.addChildWithData(newState);
+                    //add this to next Level to be checked by next voter
+                    nextLevel.add(child);
+                }
+                //add abstention
+                ElectionState cState = currNode.getData();
+                ElectionState absState = new ElectionState(cState.getCurrentScores(), cState.getCurrentWinners(), 0);
+                Node<ElectionState> child = currNode.addChildWithData(absState);
+                nextLevel.add(child);
             }
             currLevel = nextLevel;
         }

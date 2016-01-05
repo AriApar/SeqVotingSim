@@ -27,12 +27,20 @@ public class BackInductionVotingTester {
                     prefList[i][j] = in.nextInt();
                 }
             }
+            boolean abs = false; boolean cost = false;
+            if (args.length > 0) {
+                if (args[0].equals("-a")) abs = true;
+                else if (args[0].equals("-ac")) {
+                    abs = true;
+                    cost = true;
+                }
+            }
 
             PreferenceList pref = new PreferenceList(prefList);
             VotingOrder order = new VotingOrder(voters, true);
             VotingRule rule = new PluralityVR(candidates);
 
-            BackInductionElection e = new BackInductionElection(pref, order, rule);
+            BackInductionElection e = new BackInductionElection(pref, order, rule, abs, cost);
 
             ArrayList<ElectionState> winners = e.findNE();
             System.out.println("This election has " + winners.size() +

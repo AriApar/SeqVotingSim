@@ -13,7 +13,7 @@ public class ElectionState {
     public ElectionState(int numCandidates) {
         currentScores = new ScoreVector(numCandidates);
         currentWinners = new ArrayList<>();
-        voteCast = -1;
+        voteCast = 0;
     }
 
     public ElectionState(int[] currentScores, ArrayList<Integer> currentWinners, int voteCast) {
