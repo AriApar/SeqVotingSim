@@ -91,12 +91,17 @@ public class BackInductionElection extends Election {
             Queue<Node<ElectionState>> nextLevel = new LinkedList<>();
              while (currLevel.peek() != null) {
                  Node<ElectionState> currNode = currLevel.remove();
+                 ElectionState currState = currNode.getData();
                 //generate all possible states on all possible votes of v
                 for (int i = 1; i <= numCandidates; i++) {
                     int candidate = v.getPreference(i);
                     ScoreVector s = v.voteForPreference(i);
-                    s = s.addImmutable(currNode.getData().getCurrentScores());
-                    ElectionState newState = new ElectionState(s,getWinners(s),candidate);
+                    // Prepare new score vector
+                    s = s.addImmutable(currState.getCurrentScores());
+                    //Prepare new votes
+                    ArrayList<Integer> newVotes = prepareNewVotes(currState, candidate);
+                    //Create new state
+                    ElectionState newState = new ElectionState(s,getWinners(s), newVotes ,candidate);
                     //add as the child of currNode
                     Node<ElectionState> child = currNode.addChildWithData(newState);
                     //add this to next Level to be checked by next voter
@@ -120,20 +125,25 @@ public class BackInductionElection extends Election {
             Queue<Node<ElectionState>> nextLevel = new LinkedList<>();
             while (currLevel.peek() != null) {
                 Node<ElectionState> currNode = currLevel.remove();
+                ElectionState currState = currNode.getData();
                 //generate all possible states on all possible votes of v
                 for (int i = 1; i <= numCandidates; i++) {
                     int candidate = v.getPreference(i);
                     ScoreVector s = v.voteForPreference(i);
-                    s = s.addImmutable(currNode.getData().getCurrentScores());
-                    ElectionState newState = new ElectionState(s,getWinners(s),candidate);
+                    // Prepare new score vector
+                    s = s.addImmutable(currState.getCurrentScores());
+                    //Prepare new votes
+                    ArrayList<Integer> newVotes = prepareNewVotes(currState, candidate);
+                    //Create new state
+                    ElectionState newState = new ElectionState(s,getWinners(s), newVotes ,candidate);
                     //add as the child of currNode
                     Node<ElectionState> child = currNode.addChildWithData(newState);
                     //add this to next Level to be checked by next voter
                     nextLevel.add(child);
                 }
                 //add abstention
-                ElectionState cState = currNode.getData();
-                ElectionState absState = new ElectionState(cState.getCurrentScores(), cState.getCurrentWinners(), 0);
+                ElectionState absState = new ElectionState(currState.getCurrentScores(), currState.getCurrentWinners(),
+                        prepareNewVotes(currState, 0) ,0);
                 Node<ElectionState> child = currNode.addChildWithData(absState);
                 nextLevel.add(child);
             }
@@ -142,5 +152,11 @@ public class BackInductionElection extends Election {
         //game tree generated, clean up currLevel just in case, return root
         currLevel = null;
         return new Tree(root);
+    }
+
+    private ArrayList<Integer> prepareNewVotes(ElectionState state, int candidate) {
+        ArrayList<Integer> newVotes = (ArrayList<Integer>) state.getCurrentVotes().clone();
+        newVotes.add(candidate);
+        return newVotes;
     }
 }

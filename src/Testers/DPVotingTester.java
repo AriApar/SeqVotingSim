@@ -43,7 +43,7 @@ public class DPVotingTester {
                 System.out.println("Nash Equilibrium " + i + ":");
                 System.out.print("The winner is candidate(s) ");
                 ArrayList<Integer> wins = it.next();
-                for (int j = 0; j < wins.size(); j++) System.out.println(wins.get(j) + ", ");
+                for (int j = 0; j < wins.size(); j++) System.out.print(wins.get(j) + ", ");
                 //System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
             }
 

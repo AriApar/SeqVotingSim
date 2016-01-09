@@ -8,23 +8,21 @@ import java.util.ArrayList;
 public class ElectionState {
     private ScoreVector currentScores;
     private ArrayList<Integer> currentWinners;
+    private ArrayList<Integer> currentVotes;
     private int voteCast; // vote cast by the last voter
 
     public ElectionState(int numCandidates) {
         currentScores = new ScoreVector(numCandidates);
         currentWinners = new ArrayList<>();
+        currentVotes = new ArrayList<>();
         voteCast = 0;
     }
 
-    public ElectionState(int[] currentScores, ArrayList<Integer> currentWinners, int voteCast) {
-        this.currentScores = new ScoreVector(currentScores);
-        this.currentWinners = currentWinners;
-        this.voteCast = voteCast;
-    }
-
-    public ElectionState(ScoreVector currentScores, ArrayList<Integer> currentWinners, int voteCast) {
+    public ElectionState(ScoreVector currentScores, ArrayList<Integer> currentWinners,
+                         ArrayList<Integer> currentVotes, int voteCast) {
         this.currentScores = currentScores;
         this.currentWinners = currentWinners;
+        this.currentVotes = currentVotes;
         this.voteCast = voteCast;
     }
 
@@ -35,6 +33,8 @@ public class ElectionState {
     public ArrayList<Integer> getCurrentWinners() {
         return currentWinners;
     }
+
+    public ArrayList<Integer> getCurrentVotes() { return currentVotes;}
 
     public int getVoteCast() {
         return voteCast;

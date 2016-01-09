@@ -1,5 +1,6 @@
 package VotingRules;
 
+import Model.ElectionState;
 import Model.Preferences;
 import Model.ScoreVector;
 import Model.VotingRule;

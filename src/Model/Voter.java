@@ -16,7 +16,7 @@ public class Voter {
     private int voterId; //1..N
     private VotingOrder order;
     private PreferenceList preferenceList;
-    private final double COST_OF_VOTING = 0.1D;
+    private final double COST_OF_VOTING = 0.01D;
 
     public Voter(int voterId, VotingRule rule, VotingOrder order, PreferenceList preferenceList) {
         this.rule = rule;
