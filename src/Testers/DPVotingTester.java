@@ -35,7 +35,7 @@ public class DPVotingTester {
 
             DPElection e = new DPElection(pref, order, rule);
 
-            Set<ArrayList<Integer>> winners = e.findNE();
+            Set<ArrayList<Integer>> winners = e.findNEAbs();
             System.out.println("This election has " + winners.size() +
                     " Nash equilibria!");
             Iterator<ArrayList<Integer>> it = winners.iterator();

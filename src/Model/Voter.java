@@ -53,11 +53,22 @@ public class Voter {
     }
 
     public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) throws Exception {
-        assert (candidates.size() != 0);
+        if (candidates.size() == 0) return Double.MAX_VALUE;
         double res = 0D;
         Preferences pref = preferenceList.getPreferencesForVoter(voterId);
         for (Integer c : candidates) {
             res += (double) pref.getPreferenceOfCandidate(c);
+        }
+        res = res / (double) candidates.size();
+        return res;
+    }
+
+    public double getCombinedUtilityForCandidates(ArrayList<Integer> candidates) throws Exception {
+        if (candidates.size() == 0) return Double.MIN_VALUE;
+        double res = 0D;
+
+        for (Integer c : candidates) {
+            res += (double) getUtilityForCandidate(c);
         }
         res = res / (double) candidates.size();
         return res;

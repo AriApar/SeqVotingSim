@@ -82,6 +82,67 @@ public class DPElection extends Election{
         return g.get(generateZeroVector(numAltFactorial));
     }
 
+    public Set<ArrayList<Integer>> findNEAbs() throws Exception{
+        int counter = 0; //call counter to g.put
+        HashMap<ScoreVector, LinkedHashSet<ArrayList<Integer>>> g = new HashMap<>();
+        int numAlternatives = pref.getNumCandidates();
+        int numVoters = voters.size();
+        int numAltFactorial = factorial(numAlternatives);
+        //add abstention possibility
+        numAltFactorial += 1;
+        final ArrayList<ScoreVector> EVector = generateEVectors(numAltFactorial);
+        for (int j = numVoters +1; j >=1; j--) {
+            Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
+            for (ScoreVector s : states) {
+                if (j == numVoters + 1) {
+                    //System.out.println(s);
+                    LinkedHashSet<ArrayList<Integer>> winnerSet = new LinkedHashSet<>();
+                    winnerSet.add(rule.getWinnersOfPrefVectors(s, numAlternatives));
+                    g.put(s, winnerSet); //counter++;
+                }
+                else {
+                    //System.out.println(g.size());
+                    double bestPref = Double.MAX_VALUE;
+                    ArrayList<ScoreVector> optimum_e = new ArrayList<>();
+                    boolean abs = false;
+                    for (ScoreVector e : EVector) {
+                        abs = (e.get(e.getLength()-1) == 1);
+                        double cost = (abs ? 0.01D : 0D);
+                        ScoreVector gSum = s.addImmutable(e);
+                        //System.out.println(gSum);
+                        ArrayList<Integer> cWinners = g.get(gSum).iterator().next();
+                        //because we only need the rank of the current winners, getting only one is fine as
+                        //all winners will have same rank if they're all optimal
+                        double cPref = voters.get(j-1).getCombinedPreferenceForCandidates(cWinners);
+                        int comparison = Double.compare(cPref - cost, bestPref);
+                        if(comparison == 0) {
+                            // add this to current set of optimum e
+                            optimum_e.add(e);
+                        }
+                        else if (comparison < 0) {
+                            // new util less, trash old optimum, add this to new
+                            optimum_e.clear(); optimum_e.add(e); bestPref = cPref;
+                        }
+                    }
+                    for (ScoreVector e : optimum_e) {
+                        ScoreVector sPlusE = s.addImmutable(e);
+                        LinkedHashSet<ArrayList<Integer>> g_of_sPlusE = g.get(sPlusE);
+                        if(g.containsKey(s)) {
+                            //System.out.println(s.toString());
+                            for (ArrayList<Integer> item : g.get(s)) g_of_sPlusE.add(item);
+                            g.put(s, g_of_sPlusE); counter++;
+                        }
+                        else {
+                            g.put(s, g_of_sPlusE); //counter++;
+                        }
+                    }
+                }
+            }
+        }
+        //System.out.println(counter);
+        return g.get(generateZeroVector(numAltFactorial));
+    }
+
     private ArrayList<ScoreVector> generateEVectors(int size) {
         ArrayList<ScoreVector> res = new ArrayList<>(size);
         ScoreVector zeroVector = generateZeroVector(size);

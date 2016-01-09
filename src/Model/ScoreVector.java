@@ -45,7 +45,7 @@ public class ScoreVector {
     }
 
     public int get(int i) {
-        assert i >= 0 && i < scores.length;
+        assert (i >= 0 && i < scores.length);
         return scores[i];
     }
 
