@@ -1,4 +1,6 @@
-package Model;
+package Elections;
+
+import Model.ScoreVector;
 
 import java.util.ArrayList;
 

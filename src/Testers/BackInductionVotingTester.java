@@ -1,7 +1,7 @@
 package Testers;
 
 import Elections.BackInductionElection;
-import Elections.TruthfulElection;
+import Elections.ElectionState;
 import Model.*;
 import VotingRules.PluralityVR;
 

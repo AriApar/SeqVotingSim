@@ -1,7 +1,5 @@
 package util;
 
-import Model.Election;
-
 import java.util.ArrayList;
 
 /**

@@ -48,4 +48,8 @@ public class PreferenceList {
     public int getNumCandidates() {
         return alternatives;
     }
+
+    public int getNumVoters() {
+        return voters;
+    }
 }

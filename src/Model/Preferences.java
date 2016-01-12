@@ -24,9 +24,14 @@ public class Preferences {
     public int length() { return pref.size(); }
 
     public int getPreferenceOfCandidate(int candidate) throws Exception {
-        int index = 0;
-        while (index < alternatives && pref.get(index) != candidate ) index++;
+        int index = find(candidate);
         if (index == alternatives) throw new Exception("candidateID given to getPrefOfCand not in Preferences");
         return index + 1;
+    }
+
+    private int find(int candidate) {
+        int index = 0;
+        while (index < alternatives && pref.get(index) != candidate ) index++;
+        return index;
     }
 }

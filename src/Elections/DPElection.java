@@ -9,23 +9,15 @@ import java.util.*;
  */
 public class DPElection extends Election{
     //Dynamic programming election that follows Algorithm 1 from Stackelberg paper.
+    private boolean abstention;
+    private boolean cost;
 
-    public DPElection(PreferenceList pref, VotingOrder order, VotingRule rule) {
-        this.pref = pref;
-        this.order = order;
-        this.voters = new ArrayList<>();
-        for (int voterId : order) {
-            this.voters.add(new Voter(voterId, rule, order, pref));
-        }
-        this.rule = rule;
-        scores = new ScoreVector(pref.getNumCandidates());
+    protected DPElection(ElectionParameters params) {
+        setElection(params);
+        abstention = params.canAbstain();
+        cost = params.hasCost();
     }
 
-    @Override
-    public int run() throws Exception {
-        throw new Exception("YOU WERE SUPPOSED TO USE findNE!");
-        //return findNE();
-    }
     public Set<ArrayList<Integer>> findNE() throws Exception{
         int counter = 0; //call counter to g.put
         HashMap<ScoreVector, LinkedHashSet<ArrayList<Integer>>> g = new HashMap<>();

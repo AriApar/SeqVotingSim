@@ -11,7 +11,7 @@ public interface VotingRule {
 
     public ScoreVector vote(int candidate);
 
-    //public ArrayList<Integer> getWinners(ScoreVector s);
+    public ArrayList<Integer> getWinners(ScoreVector s);
 
     ArrayList<Integer> getWinnersOfPrefVectors(ScoreVector s, int numAlternatives);
 

@@ -32,7 +32,7 @@ public class ScoreVector {
     }*/
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
-        assert voteVector.getLength() == scores.length;
+        assert (voteVector.getLength() == scores.length);
         int[] resArr = new int[scores.length];
         for (int i = 0; i < scores.length; i++) {
             resArr[i] = scores[i] + voteVector.get(i);
@@ -60,7 +60,7 @@ public class ScoreVector {
     }*/
 
     public ScoreVector cloneAndSet(int index, int value) {
-        assert index >= 0 && index < scores.length;
+        assert (index >= 0 && index < scores.length);
         int[] resArr = scores.clone();
         resArr[index] = value;
         return new ScoreVector(resArr);

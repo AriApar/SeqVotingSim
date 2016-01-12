@@ -1,13 +1,11 @@
 package VotingRules;
 
-import Model.ElectionState;
+import Elections.ElectionParameters;
 import Model.Preferences;
 import Model.ScoreVector;
 import Model.VotingRule;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
 
 
 /**
@@ -91,6 +89,20 @@ public class PluralityVR implements VotingRule {
             }
             return res;
         }
+    }
+
+    public ArrayList<Integer> getWinners(ScoreVector scores) {
+        ArrayList<Integer> winners = new ArrayList<>();
+        int maxVotes = 0;
+        for (int candidate = 1; candidate <= scores.getLength(); candidate++) {
+            if (scores.getCandidate(candidate) > maxVotes) {
+                winners.clear(); winners.add(candidate); maxVotes = scores.getCandidate(candidate);
+            }
+            else if (scores.getCandidate(candidate) == maxVotes) {
+                winners.add(candidate);
+            }
+        }
+        return winners;
     }
 
     /*@Override

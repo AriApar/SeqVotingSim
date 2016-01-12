@@ -53,6 +53,12 @@ public class VotingOrder implements Iterable<Integer> {
         return it;
     }
 
+    public int indexOf(int voterId) {
+        int index = 0;
+        while (index < voteOrder.length && voteOrder[index] != voterId) index+=1;
+        return index;
+    }
+
     public boolean isLastVoter(int voterId) {
         return voteOrder[voteOrder.length -1] == voterId;
     }

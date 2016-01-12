@@ -15,50 +15,15 @@ public class BackInductionElection extends Election {
     //private ArrayList<Voter> voters;
     //private VotingRule rule;
     //private ScoreVector scores;
-    private boolean abstention = false;
-    private boolean cost = false;
+    private boolean abstention;
+    private boolean cost;
+    private ArrayList<Voter> voters;
 
-    public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule, boolean abstention, boolean cost) {
-        this(pref, order, rule);
-        this.abstention = abstention;
-        this.cost = cost;
-    }
-
-    public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule, boolean abstention) {
-        this(pref, order, rule);
-        this.abstention = abstention;
-    }
-
-    public BackInductionElection(PreferenceList pref, VotingOrder order, VotingRule rule) {
-        this.pref = pref;
-        this.order = order;
-        this.voters = new ArrayList<>();
-        for (int voterId : order) {
-            this.voters.add(new Voter(voterId, rule, order, pref));
-        }
-        this.rule = rule;
-        scores = new ScoreVector(pref.getNumCandidates());
-    }
-
-
-    @Override
-    public int run() throws Exception{
-
-        Tree<ElectionState> root = abstention ? generateGameTreeAbs() : generateGameTree();
-        //shallow cloning is fine, voters are immutable objects.
-        ArrayList<Voter> revVoters = new ArrayList<>(voters);
-        Collections.reverse(revVoters);
-        for (int i = 0 ; i < revVoters.size(); i++) {
-            Voter v = revVoters.get(i);
-            //voter v gets to vote on level revVoters.size() - i
-            //we expect this to modify the tree represented by root
-            v.chooseWhoToVote(root, revVoters.size() - i, cost);
-        }
-        // at this point the tree consists of only winners
-        ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
-        scores = resList.get(0).getData().getCurrentScores();
-
-        return getUniqueWinner(scores);
+    protected BackInductionElection(ElectionParameters params) {
+        setElection(params);
+        voters = getVoters();
+        abstention = params.canAbstain();
+        cost = params.hasCost();
     }
 
     public ArrayList<ElectionState> findNE() throws Exception {
