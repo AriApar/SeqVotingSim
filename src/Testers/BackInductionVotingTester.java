@@ -17,7 +17,7 @@ public class BackInductionVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
         try {
-            Scanner in = new Scanner(getFile("15x3Sample"));
+            Scanner in = new Scanner(getFile("SmallPListSample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];
@@ -26,7 +26,7 @@ public class BackInductionVotingTester extends AbstractTester {
                     prefList[i][j] = in.nextInt();
                 }
             }
-            ElectionType type = null;
+            ElectionType type = ElectionType.GAMETREE;
             if (args.length > 0) {
                 if (args[0].equals("-a")) type = ElectionType.GAMETREEWITHABS;
                 else if (args[0].equals("-ac")) {

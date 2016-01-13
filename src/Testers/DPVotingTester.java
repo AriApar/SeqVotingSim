@@ -27,7 +27,7 @@ public class DPVotingTester extends AbstractTester {
                     prefList[i][j] = in.nextInt();
                 }
             }
-            ElectionType type = null;
+            ElectionType type = ElectionType.DP;
             if (args.length > 0) {
                 if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
                 else if (args[0].equals("-ac")) {
