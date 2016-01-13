@@ -1,7 +1,6 @@
 package Testers;
 
-import Elections.BackInductionElection;
-import Elections.DPElection;
+import Elections.*;
 import Model.*;
 import VotingRules.PluralityVR;
 
@@ -15,7 +14,7 @@ import java.util.Set;
 /**
  * Created by AriApar on 02/12/2015.
  */
-public class DPVotingTester {
+public class DPVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
         try {
@@ -28,14 +27,22 @@ public class DPVotingTester {
                     prefList[i][j] = in.nextInt();
                 }
             }
+            ElectionType type = null;
+            if (args.length > 0) {
+                if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
+                else if (args[0].equals("-ac")) {
+                    type = ElectionType.DPWITHCOSTLYABS;
+                }
+            }
 
             PreferenceList pref = new PreferenceList(prefList);
             VotingOrder order = new VotingOrder(voters, true);
             VotingRule rule = new PluralityVR(candidates);
 
-            DPElection e = new DPElection(pref, order, rule);
+            ElectionParameters params = new ElectionParameters(pref, order, rule, type);
+            DPElection e = (DPElection) ElectionFactory.create(params);
 
-            Set<ArrayList<Integer>> winners = e.findNEAbs();
+            Set<ArrayList<Integer>> winners = e.findNEs();
             System.out.println("This election has " + winners.size() +
                     " Nash equilibria!");
             Iterator<ArrayList<Integer>> it = winners.iterator();
@@ -44,19 +51,11 @@ public class DPVotingTester {
                 System.out.print("The winner is candidate(s) ");
                 ArrayList<Integer> wins = it.next();
                 for (int j = 0; j < wins.size(); j++) System.out.print(wins.get(j) + ", ");
-                //System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
+
             }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    private static File getFile(String fileName) {
-
-        //Get file from resources folder
-
-        File file = new File("res/PlistExamples/" + fileName);
-        return file;
     }
 }

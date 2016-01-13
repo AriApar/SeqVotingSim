@@ -1,7 +1,6 @@
 package Testers;
 
-import Elections.BackInductionElection;
-import Elections.ElectionState;
+import Elections.*;
 import Model.*;
 import VotingRules.PluralityVR;
 
@@ -14,7 +13,7 @@ import java.util.Scanner;
 /**
  * Created by AriApar on 30/11/2015.
  */
-public class BackInductionVotingTester {
+public class BackInductionVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
         try {
@@ -27,12 +26,11 @@ public class BackInductionVotingTester {
                     prefList[i][j] = in.nextInt();
                 }
             }
-            boolean abs = false; boolean cost = false;
+            ElectionType type = null;
             if (args.length > 0) {
-                if (args[0].equals("-a")) abs = true;
+                if (args[0].equals("-a")) type = ElectionType.GAMETREEWITHABS;
                 else if (args[0].equals("-ac")) {
-                    abs = true;
-                    cost = true;
+                    type = ElectionType.GAMETREEWITHCOSTLYABS;
                 }
             }
 
@@ -40,40 +38,38 @@ public class BackInductionVotingTester {
             VotingOrder order = new VotingOrder(voters, true);
             VotingRule rule = new PluralityVR(candidates);
 
-            BackInductionElection e = new BackInductionElection(pref, order, rule, abs, cost);
+            ElectionParameters params = new ElectionParameters(pref, order, rule, type);
+            BackInductionElection e = (BackInductionElection) ElectionFactory.create(params);
 
             ArrayList<ElectionState> winners = e.findNE();
-            System.out.println("This election has " + winners.size() +
-                    " Nash equilibria!");
-            Iterator<ElectionState> it = winners.iterator();
-            for (int i = 1; i<= winners.size(); i++) {
-                System.out.println("Nash Equilibrium " + i + ":");
-                System.out.print("The winner is candidate(s) ");
-                ElectionState wins = it.next();
-                //Print winners
-                ArrayList<Integer> elected = wins.getCurrentWinners();
-                for (int j = 0; j < elected.size() - 1; j++) System.out.print(elected.get(j) + ", ");
-                System.out.println(elected.get(elected.size() -1));
-                //Print vote distribution
-                System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
-                //Print votes cast by each voter
-                System.out.println("Votes Cast (in order): ");
-                Iterator<Integer> iter = wins.getCurrentVotes().iterator();
-                for (Integer v : order) {
-                    System.out.println("Voter " + v + ": Candidate " +  iter.next());
-                }
-            }
+
+            printResults(order, winners);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private static File getFile(String fileName) {
-
-        //Get file from resources folder
-
-        File file = new File("res/PlistExamples/" + fileName);
-        return file;
+    private static void printResults(VotingOrder order, ArrayList<ElectionState> winners) {
+        System.out.println("This election has " + winners.size() +
+                " Nash equilibria!");
+        Iterator<ElectionState> it = winners.iterator();
+        for (int i = 1; i<= winners.size(); i++) {
+            System.out.println("Nash Equilibrium " + i + ":");
+            System.out.print("The winner is candidate(s) ");
+            ElectionState wins = it.next();
+            //Print winners
+            ArrayList<Integer> elected = wins.getCurrentWinners();
+            for (int j = 0; j < elected.size() - 1; j++) System.out.print(elected.get(j) + ", ");
+            System.out.println(elected.get(elected.size() -1));
+            //Print vote distribution
+            System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
+            //Print votes cast by each voter
+            System.out.println("Votes Cast (in order): ");
+            Iterator<Integer> iter = wins.getCurrentVotes().iterator();
+            for (Integer v : order) {
+                System.out.println("Voter " + v + ": Candidate " +  iter.next());
+            }
+        }
     }
 }

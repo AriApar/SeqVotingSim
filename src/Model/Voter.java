@@ -24,7 +24,7 @@ public class Voter {
     //Truthful vote
     public ScoreVector vote() {
 
-        return getRule().vote(getPrefList().getPreferencesForVoter(voterId));
+        return getRule().voteTruthful(getPrefList().getPreferencesForVoter(voterId));
     }
 
     public ScoreVector vote(int candidate) {

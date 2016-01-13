@@ -17,11 +17,11 @@ public class TruthfulElection extends Election {
         //scores = new ScoreVector(pref.getNumCandidates());
     }
 
-    public int run() {
+    public ScoreVector run() {
         ScoreVector scores = new ScoreVector(getParams().getPref().getNumCandidates());
         for(Voter v : getVoters()) {
             scores = scores.addImmutable(v.vote());
         }
-        return getUniqueWinner(scores);
+        return scores;
     }
 }

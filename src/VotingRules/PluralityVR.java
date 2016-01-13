@@ -26,11 +26,12 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public ScoreVector vote(Preferences pref) {
-        ScoreVector res = new ScoreVector(pref.length());
+    public ScoreVector voteTruthful(Preferences pref) {
+        /*ScoreVector res = new ScoreVector(pref.length());
         int candidateNo = pref.getNthPreference(1);
         res = res.cloneAndSetCandidate(candidateNo, 1);
-        return res;
+        return res;*/
+        return vote(pref.getNthPreference(1));
     }
 
     @Override
@@ -41,54 +42,40 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public ArrayList<Integer> getWinnersOfPrefVectors(ScoreVector s, int numAlternatives) {
+    public ArrayList<Integer> getWinnersOfPrefVectors(ScoreVector s, ElectionParameters params) {
         //Gets the winners if each preference got s(i) no of votes
         //preferences in s ordered lexicographically
-        //last entry is abstention if true
+        //if abstention is possible, there is an abstention vector at the end of scorevectors
         //no abstention
-        if (s.getLength() % 2 == 0) {
-            ArrayList<Integer> res = new ArrayList<>();
-            int block = s.getLength() / numAlternatives;
-            int maxVotes = 0;
-            int index = 0;
-            for (int i = 1; i <= numAlternatives; i++) {
-                int cVotes = 0;
-                for (int j = 0; j < block; j++) {
-                    cVotes += s.get(index);
-                    index++;
-                }
-                if (cVotes > maxVotes) {
-                    res.clear();
-                    res.add(i);
-                    maxVotes = cVotes;
-                } else if (cVotes != 0 && cVotes == maxVotes) {
-                    res.add(i);
-                }
-            }
-            return res;
+        if (!params.canAbstain()) {
+            return calcWinnersOfPrefVectors(s, params.numberOfCandidates(), 0);
         }
         else {
-            //abstention
-            ArrayList<Integer> res = new ArrayList<>();
-            int block = (s.getLength() - 1) / numAlternatives;
-            int maxVotes = 0;
-            int index = 0;
-            for (int i = 1; i <= numAlternatives; i++) {
-                int cVotes = 0;
-                for (int j = 0; j < block; j++) {
-                    cVotes += s.get(index);
-                    index++;
-                }
-                if (cVotes > maxVotes) {
-                    res.clear();
-                    res.add(i);
-                    maxVotes = cVotes;
-                } else if (cVotes != 0 && cVotes == maxVotes) {
-                    res.add(i);
-                }
-            }
-            return res;
+            return calcWinnersOfPrefVectors(s, params.numberOfCandidates(), 1);
         }
+    }
+
+
+    private ArrayList<Integer> calcWinnersOfPrefVectors(ScoreVector s, int numAlternatives, int absCounter) {
+        ArrayList<Integer> res = new ArrayList<>();
+        int block = (s.getLength() - absCounter)/ numAlternatives;
+        int maxVotes = 0;
+        int index = 0;
+        for (int i = 1; i <= numAlternatives; i++) {
+            int cVotes = 0;
+            for (int j = 0; j < block; j++) {
+                cVotes += s.get(index);
+                index++;
+            }
+            if (cVotes > maxVotes) {
+                res.clear();
+                res.add(i);
+                maxVotes = cVotes;
+            } else if (cVotes != 0 && cVotes == maxVotes) {
+                res.add(i);
+            }
+        }
+        return res;
     }
 
     public ArrayList<Integer> getWinners(ScoreVector scores) {

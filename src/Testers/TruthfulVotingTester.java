@@ -1,7 +1,6 @@
 package Testers;
 
-import Elections.Election;
-import Elections.TruthfulElection;
+import Elections.*;
 import Model.*;
 import VotingRules.PluralityVR;
 
@@ -31,14 +30,16 @@ public class TruthfulVotingTester {
             VotingOrder order = new VotingOrder(voters, true);
             VotingRule rule = new PluralityVR(candidates);
 
-            Election e = new TruthfulElection(pref, order, rule);
+            ElectionParameters params = new ElectionParameters(pref, order, rule, ElectionType.TRUTHFUL);
+            TruthfulElection e = (TruthfulElection) ElectionFactory.create(params);
 
-            int winner = e.run();
+            ScoreVector scores = e.run();
+            int winner = e.getUniqueWinner(scores);
             System.out.println("The winner is candidate " + winner +
-                                " with " + e.getScore(winner) + " votes!");
+                                " with " + scores.getCandidate(winner) + " votes!");
             System.out.println("Distribution of Votes:");
             for (int i = 1; i <= pref.getNumCandidates(); i++) {
-                System.out.println("Candidate " + i + ": " + e.getScores().getCandidate(i) + " votes.");
+                System.out.println("Candidate " + i + ": " + scores.getCandidate(i) + " votes.");
             }
 
         } catch (FileNotFoundException e) {
