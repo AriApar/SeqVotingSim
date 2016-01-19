@@ -17,7 +17,7 @@ public class BackInductionVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
         try {
-            Scanner in = new Scanner(getFile("SmallPListSample"));
+            Scanner in = new Scanner(getFile("3x3Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];
@@ -50,26 +50,5 @@ public class BackInductionVotingTester extends AbstractTester {
         }
     }
 
-    private static void printResults(VotingOrder order, ArrayList<ElectionState> winners) {
-        System.out.println("This election has " + winners.size() +
-                " Nash equilibria!");
-        Iterator<ElectionState> it = winners.iterator();
-        for (int i = 1; i<= winners.size(); i++) {
-            System.out.println("Nash Equilibrium " + i + ":");
-            System.out.print("The winner is candidate(s) ");
-            ElectionState wins = it.next();
-            //Print winners
-            ArrayList<Integer> elected = wins.getCurrentWinners();
-            for (int j = 0; j < elected.size() - 1; j++) System.out.print(elected.get(j) + ", ");
-            System.out.println(elected.get(elected.size() -1));
-            //Print vote distribution
-            System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
-            //Print votes cast by each voter
-            System.out.println("Votes Cast (in order): ");
-            Iterator<Integer> iter = wins.getCurrentVotes().iterator();
-            for (Integer v : order) {
-                System.out.println("Voter " + v + ": Candidate " +  iter.next());
-            }
-        }
-    }
+
 }

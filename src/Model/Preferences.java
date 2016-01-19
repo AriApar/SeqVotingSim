@@ -21,7 +21,7 @@ public class Preferences {
         return pref.get(n-1);
     }
 
-    public int length() { return pref.size(); }
+    public int length() { return alternatives; }
 
     public int getPreferenceOfCandidate(int candidate) throws Exception {
         int index = find(candidate);
@@ -31,7 +31,7 @@ public class Preferences {
 
     private int find(int candidate) {
         int index = 0;
-        while (index < alternatives && pref.get(index) != candidate ) index++;
+        while (index < alternatives && pref.get(index) != candidate ) index+=1;
         return index;
     }
 }

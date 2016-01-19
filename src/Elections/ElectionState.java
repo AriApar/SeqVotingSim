@@ -41,4 +41,29 @@ public class ElectionState {
     public int getVoteCast() {
         return voteCast;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ElectionState that = (ElectionState) o;
+
+        if (voteCast != that.voteCast) return false;
+        if (currentScores != null ? !currentScores.equals(that.currentScores) : that.currentScores != null)
+            return false;
+        if (currentWinners != null ? !currentWinners.equals(that.currentWinners) : that.currentWinners != null)
+            return false;
+        return currentVotes != null ? currentVotes.equals(that.currentVotes) : that.currentVotes == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = currentScores != null ? currentScores.hashCode() : 0;
+        result = 31 * result + (currentWinners != null ? currentWinners.hashCode() : 0);
+        result = 31 * result + (currentVotes != null ? currentVotes.hashCode() : 0);
+        result = 31 * result + voteCast;
+        return result;
+    }
 }

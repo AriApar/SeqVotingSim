@@ -42,7 +42,11 @@ public class DPVotingTester extends AbstractTester {
             ElectionParameters params = new ElectionParameters(pref, order, rule, type);
             DPElection e = (DPElection) ElectionFactory.create(params);
 
-            Set<ArrayList<Integer>> winners = e.findNEs();
+            ArrayList<ElectionState> winners = e.findNE();
+
+            printResults(order, winners);
+
+            /*Set<ArrayList<Integer>> winners = e.findNEs();
             System.out.println("This election has " + winners.size() +
                     " Nash equilibria!");
             Iterator<ArrayList<Integer>> it = winners.iterator();
@@ -52,7 +56,7 @@ public class DPVotingTester extends AbstractTester {
                 ArrayList<Integer> wins = it.next();
                 for (int j = 0; j < wins.size(); j++) System.out.print(wins.get(j) + ", ");
 
-            }
+            }*/
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
