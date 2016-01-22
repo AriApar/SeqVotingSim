@@ -18,7 +18,7 @@ public class DPVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
         try {
-            Scanner in = new Scanner(getFile("SmallPListSample"));
+            Scanner in = new Scanner(getFile("15x3Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];

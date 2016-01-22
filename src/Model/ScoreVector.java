@@ -71,16 +71,19 @@ public class ScoreVector {
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(scores) * 31;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ScoreVector that = (ScoreVector) o;
+
+        return Arrays.equals(scores, that.scores);
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ScoreVector)) return false;
-        ScoreVector that = (ScoreVector) obj;
-        return Arrays.equals(scores, that.scores);
+    public int hashCode() {
+        return Arrays.hashCode(scores);
     }
 
     public ScoreVector cloneAndSetCandidate(int candidate, int value) {

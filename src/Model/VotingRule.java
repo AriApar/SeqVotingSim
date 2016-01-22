@@ -10,11 +10,11 @@ import java.util.ArrayList;
 public interface VotingRule {
 
     //Truthful
-    public ScoreVector voteTruthful(Preferences pref);
+    ScoreVector voteTruthful(Preferences pref);
 
-    public ScoreVector vote(int candidate);
+    ScoreVector vote(int candidate);
 
-    public ArrayList<Integer> getWinners(ScoreVector s);
+    ArrayList<Integer> getWinners(ScoreVector s);
 
     ArrayList<Integer> getWinnersOfPrefVectors(ScoreVector s, ElectionParameters params);
 

@@ -4,6 +4,7 @@ import Model.*;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import gnu.trove.map.hash.THashMap;
 
 /**
  * Created by AriApar on 01/12/2015.
@@ -14,43 +15,6 @@ public class DPElection extends Election{
     private boolean cost;
     private ArrayList<Voter> voters;
     private final double COST_OF_VOTING = 0.01D;
-
-    private class DPInfo {
-        private ArrayList<Integer> winners;
-        private ScoreVector prefE;
-
-        public DPInfo(ArrayList<Integer> winners, ScoreVector prefVector) {
-            this.winners = winners;
-            this.prefE = prefVector;
-        }
-
-        public ArrayList<Integer> getWinners() {
-            return winners;
-        }
-
-        public ScoreVector getE() {
-            return prefE;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            DPInfo dpInfo = (DPInfo) o;
-
-            if (winners != null ? !winners.equals(dpInfo.winners) : dpInfo.winners != null) return false;
-            return prefE != null ? prefE.equals(dpInfo.prefE) : dpInfo.prefE == null;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = winners != null ? winners.hashCode() : 0;
-            result = 31 * result + (prefE != null ? prefE.hashCode() : 0);
-            return result;
-        }
-    }
 
     private class Triple<X, Y, Z> {
         public final X first;
@@ -153,7 +117,7 @@ public class DPElection extends Election{
     }*/
 
     public ArrayList<ElectionState> findNE() throws Exception{
-        HashMap<ScoreVector, Set<DPInfo>> g = new HashMap<>();
+        Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
         int numAlternatives = getParams().numberOfCandidates();
         int numVoters = voters.size();
         int numAltFactorial = factorial(numAlternatives);
@@ -177,7 +141,7 @@ public class DPElection extends Election{
         return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
     }
 
-    private ArrayList<ElectionState> generateWinnerStates(HashMap<ScoreVector, Set<DPInfo>> g,
+    private ArrayList<ElectionState> generateWinnerStates(Map<ScoreVector, Set<DPInfo>> g,
                                                           Set<DPInfo> dpInfos, int numAlternatives,
                                                           int numAltFactorial) throws Exception {
         //todo: UGLY AS HELL
@@ -245,7 +209,7 @@ public class DPElection extends Election{
         }
     }
 
-    private void getWinnersElseCase(HashMap<ScoreVector, Set<DPInfo>> g,
+    private void getWinnersElseCase(Map<ScoreVector, Set<DPInfo>> g,
                                     ArrayList<ScoreVector> EVector,
                                     int j, ScoreVector s) throws Exception {
         double bestPref = Double.MIN_VALUE;
@@ -267,7 +231,7 @@ public class DPElection extends Election{
             //all winners will have same rank if they're all optimal
 
             double cPref = voters.get(j-1).getCombinedUtilityForCandidates(cWinners);
-            cPref = cPref - cost;
+            cPref = cPref - cost + indUtil;
             //double totalVoteCost = (abstention) ? getNonAbstentionCount(s) * COST_OF_VOTING : 0D;
             //todo: remove indUtil depending on edith
             int comparison = Double.compare(cPref //+ indUtil
@@ -282,6 +246,7 @@ public class DPElection extends Election{
             }
         }
 
+
         updateMappingWithOptima(g, s, optimum_e);
     }
 
@@ -292,7 +257,7 @@ public class DPElection extends Election{
         }
         return sum;
     }
-    private void updateMappingWithOptima(HashMap<ScoreVector, Set<DPInfo>> g, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
+    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = s.addImmutable(e);
             Set<DPInfo> g_of_sPlusE = g.get(sPlusE);
@@ -318,7 +283,7 @@ public class DPElection extends Election{
         return res;
     }
 
-    private void getWinnersBaseCase(HashMap<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
+    private void getWinnersBaseCase(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
         Set<DPInfo> res = new HashSet<>();
         ArrayList<Integer> winners = getParams().getRule().getWinnersOfPrefVectors(s, getParams());
         res.add(new DPInfo(winners, null));
@@ -386,7 +351,7 @@ public class DPElection extends Election{
         return res;
     }
 
-    /*
+
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         assert (level >= 1);
         Set<ScoreVector> scores = new HashSet<ScoreVector>();
@@ -402,7 +367,8 @@ public class DPElection extends Election{
         }
         return scores;
     }
-    */
+
+/*
 
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         if (level == 1) {
@@ -421,6 +387,7 @@ public class DPElection extends Election{
             return resSet;
         }
     }
+*/
 
     private ScoreVector generateZeroVector(int size) {
         return new ScoreVector(size);
