@@ -2,6 +2,7 @@ package Elections;
 
 import Model.*;
 
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import gnu.trove.map.hash.THashMap;
@@ -116,35 +117,149 @@ public class DPElection extends Election{
         return g.get(generateZeroVector(numAltFactorial));
     }*/
 
+    private String getFileName(int stageNo) {
+        return "tmp/map_Stage_" + stageNo + ".ser";
+    }
+
+    private boolean saveMapForStage(Map<ScoreVector, Set<DPInfo>> map, int stageNo ) {
+        try
+        {
+            File f = new File(getFileName(stageNo));
+            FileOutputStream fileOut = new FileOutputStream(f);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(map);
+            out.close();
+            fileOut.close();
+            System.out.println("Serialized data is saved in /tmp/map_Stage_" + stageNo + ".ser");
+        }
+        catch(IOException i)
+        {
+            i.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private Map<ScoreVector, Set<DPInfo>> getMapForStage(int stageNo) {
+        try
+        {
+            File f = new File(getFileName(stageNo));
+            FileInputStream fileIn = new FileInputStream(f);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) in.readObject();
+            in.close();
+            fileIn.close();
+            return map;
+        }
+        catch(IOException i)
+        {
+            i.printStackTrace();
+            return null;
+        }
+        catch(ClassNotFoundException c)
+        {
+            System.out.println("Map class not found");
+            c.printStackTrace();
+            return null;
+        }
+    }
+
     public ArrayList<ElectionState> findNE() throws Exception{
-        Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        int numAlternatives = getParams().numberOfCandidates();
         int numVoters = voters.size();
+        //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
+        Map<ScoreVector, Set<DPInfo>> gMap = new THashMap<>();
+
+        int numAlternatives = getParams().numberOfCandidates();
         int numAltFactorial = factorial(numAlternatives);
         //add abstention possibility
         if (abstention) numAltFactorial += 1;
         final ArrayList<ScoreVector> EVector =  generateEVectors(numAltFactorial);
         for (int j = numVoters +1; j >=1; j--) {
             Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
+            Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
             for (ScoreVector s : states) {
-                if (j == numVoters + 1) {
+                //
 
+                if (j == numVoters + 1) {
                     getWinnersBaseCase(g, s);
+                    //
+
                 }
                 else {
-
-                    getWinnersElseCase(g, EVector, j, s);
+                    getWinnersElseCase(g, gMap, EVector, j, s);
+                    //
                 }
             }
+
+            if (j != numVoters + 1) {
+                writeToFileAndClear(gMap, j);
+            }
+            gMap.putAll(g);
+
         }
 
-        return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
+        //return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
+        return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
     }
 
-    private ArrayList<ElectionState> generateWinnerStates(Map<ScoreVector, Set<DPInfo>> g,
+    private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
+        Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
+        Set<ElectionState> res = new HashSet<>();
+        for (DPInfo item : dpInfos) {
+            ScoreVector key = generateZeroVector(numAltFactorial);
+            ElectionState initState = new ElectionState(numAlternatives);
+            q.add(new Triple(initState, item, key));
+
+        }
+        //Initial queue done, now start processing it
+        while (!q.isEmpty()) {
+            Triple<ElectionState, DPInfo, ScoreVector> tuple = q.remove();
+            ElectionState state = tuple.first;
+            DPInfo info = tuple.second;
+            ScoreVector key = tuple.third;
+
+            if (info.getE() != null) {
+                ScoreVector e = info.getE();
+
+                ArrayList<Integer> candArray = getParams().getRule().getWinnersOfPrefVectors(e, getParams());
+                ElectionState newState = null;
+                if (candArray.size() == 0) {
+                    //abstention
+                    newState = prepNewState(state, 0);
+                }
+                else {
+                    int candidate = candArray.get(0);
+                    newState = prepNewState(state, candidate);
+                }
+
+                key = key.addImmutable(e);
+                //
+                Map<ScoreVector, Set<DPInfo>> g = getMapForStage(key.getSum());
+                Set<DPInfo> newInfos = g.get(key);
+
+                for (DPInfo item : newInfos) {
+                    q.add(new Triple<>(newState, item, key));
+                }
+            }
+            else {
+                // key null, put the resulting state in the return array
+                if (Arrays.equals(state.getCurrentWinners().toArray(), info.getWinners().toArray()))
+                    res.add(state);
+                else throw new Exception("winner states from mapping not consistent with generated electionstate");
+            }
+        }
+        return new ArrayList<>(res);
+    }
+
+    private void writeToFileAndClear(Map<ScoreVector, Set<DPInfo>> g, int j) {
+        //Writes g to file and deletes it from the array
+        saveMapForStage(g, j);
+        g.clear();
+    }
+
+    /*private ArrayList<ElectionState> generateWinnerStates(Map<ScoreVector, Set<DPInfo>> g,
                                                           Set<DPInfo> dpInfos, int numAlternatives,
                                                           int numAltFactorial) throws Exception {
-        //todo: UGLY AS HELL
         Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
         Set<ElectionState> res = new HashSet<>();
         for (DPInfo item : dpInfos) {
@@ -189,7 +304,7 @@ public class DPElection extends Election{
             }
         }
         return new ArrayList<>(res);
-    }
+    }*/
 
     private ElectionState prepNewState(ElectionState state, int candidate) {
         //Get old electionstate values to generate new one
@@ -210,6 +325,7 @@ public class DPElection extends Election{
     }
 
     private void getWinnersElseCase(Map<ScoreVector, Set<DPInfo>> g,
+                                    Map<ScoreVector, Set<DPInfo>> gLookup,
                                     ArrayList<ScoreVector> EVector,
                                     int j, ScoreVector s) throws Exception {
         double bestPref = Double.MIN_VALUE;
@@ -225,7 +341,7 @@ public class DPElection extends Election{
 
             ScoreVector gSum = s.addImmutable(e);
 
-            Set<DPInfo> cStates = g.get(gSum);
+            Set<DPInfo> cStates = gLookup.get(gSum);
             ArrayList<Integer> cWinners = cStates.iterator().next().getWinners();
             //because we only need the rank of the current winners, getting only one is fine as
             //all winners will have same rank if they're all optimal
@@ -247,7 +363,7 @@ public class DPElection extends Election{
         }
 
 
-        updateMappingWithOptima(g, s, optimum_e);
+        updateMappingWithOptima(g, gLookup, s, optimum_e);
     }
 
     private int getNonAbstentionCount(ScoreVector s) {
@@ -257,10 +373,10 @@ public class DPElection extends Election{
         }
         return sum;
     }
-    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
+    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, Map<ScoreVector, Set<DPInfo>> gLookup, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = s.addImmutable(e);
-            Set<DPInfo> g_of_sPlusE = g.get(sPlusE);
+            Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
             //prepare new DPInfo's
             g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
             if(g.containsKey(s)) {

@@ -1,5 +1,6 @@
 package Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,7 +10,7 @@ import java.util.Arrays;
  * Immutable ScoreVector
  *
  */
-public class ScoreVector {
+public class ScoreVector implements Serializable {
 
     private int[] scores;
     //private int numCandidates;
@@ -95,5 +96,13 @@ public class ScoreVector {
     public String toString() {
         return Arrays.toString(scores);
     }
+
+    public int getSum() {
+        int sum = 0;
+        for(int i = 0; i< scores.length; i++) sum += scores[i];
+        return sum;
+    }
+
+
 
 }

@@ -1,11 +1,12 @@
 package Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by AriApar on 21/01/2016.
  */
-public class DPInfo {
+public class DPInfo implements Serializable {
     private ArrayList<Integer> winners;
     private ScoreVector prefE;
 
