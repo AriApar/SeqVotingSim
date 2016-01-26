@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import gnu.trove.map.hash.THashMap;
+import gnu.trove.set.hash.THashSet;
 
 /**
  * Created by AriApar on 01/12/2015.
@@ -174,9 +175,15 @@ public class DPElection extends Election{
         //add abstention possibility
         if (abstention) numAltFactorial += 1;
         final ArrayList<ScoreVector> EVector =  generateEVectors(numAltFactorial);
+        Set<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
             //Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
-            Set<ScoreVector> states = getParams().getRule().generateStatesForLevel(j, getParams());
+            if (j == numVoters+1)
+                states = getParams().getRule().generateStatesForLevel(j, getParams());
+            else {
+                states = shrinkStatesBy1(states);
+                System.out.println("Generated states for level " + j);
+            }
             Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
             for (ScoreVector s : states) {
 
@@ -200,6 +207,17 @@ public class DPElection extends Election{
         //return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
         int stateSize = getParams().getRule().getCompilationStateSize(getParams());
         return generateWinnerStates(gMap.get(generateZeroVector(stateSize)), numAlternatives, stateSize);
+    }
+
+    private Set<ScoreVector> shrinkStatesBy1(Set<ScoreVector> states) {
+        Set<ScoreVector> res = new THashSet<>();
+        for (ScoreVector state : states) {
+            for (int i = 0; i < state.getLength(); i++) {
+                int value = state.get(i);
+                if (value != 0) res.add(state.cloneAndSet(i, value - 1));
+            }
+        }
+        return res;
     }
 
     private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
@@ -350,9 +368,7 @@ public class DPElection extends Election{
             double cPref = voters.get(j-1).getCombinedUtilityForCandidates(cWinners);
             cPref = cPref - cost + indUtil;
             //double totalVoteCost = (abstention) ? getNonAbstentionCount(s) * COST_OF_VOTING : 0D;
-            //todo: remove indUtil depending on edith
-            int comparison = Double.compare(cPref + indUtil
-                    , bestPref);
+            int comparison = Double.compare(cPref, bestPref);
             if(comparison == 0) {
                 // add this to current set of optimum e
                 optimum_e.add(e);

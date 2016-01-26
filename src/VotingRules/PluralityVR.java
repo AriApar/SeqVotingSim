@@ -4,6 +4,7 @@ import Elections.ElectionParameters;
 import Model.Preferences;
 import Model.ScoreVector;
 import Model.VotingRule;
+import gnu.trove.set.hash.THashSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -102,16 +103,17 @@ public class PluralityVR implements VotingRule {
 
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         assert (level >= 1);
-        Set<ScoreVector> scores = new HashSet<ScoreVector>();
-        scores.add(new ScoreVector(new int[size]));
+        Set<ScoreVector> scores = new THashSet<ScoreVector>();
+        scores.add(new ScoreVector(size));
         for (int i = 2; i <=level; i++) {
-            Set<ScoreVector> nextScores = new HashSet<>(scores.size()*size);
+            Set<ScoreVector> nextScores = new THashSet<>(scores.size()*size);
             for (ScoreVector s : scores) {
                 for (int j = 0; j < size; j++) {
                     nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
                 }
             }
             scores = nextScores;
+            System.out.println("Generated scores for level " + i);
         }
         return scores;
     }
