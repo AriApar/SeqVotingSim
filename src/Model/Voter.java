@@ -45,7 +45,7 @@ public class Voter {
         if (candidate == 0) throw new Exception("Trying to get utility for cand 0, most likely" +
                 "the costly voting is broken.");
         int rank = pref.getPreferenceOfCandidate(candidate);
-        return (pref.length() - rank + 1) * 10;
+        return (pref.length() - rank + 1) * 20;
     }
 
     public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) throws Exception {

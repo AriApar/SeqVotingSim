@@ -6,6 +6,8 @@ import Model.ScoreVector;
 import Model.VotingRule;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -55,6 +57,64 @@ public class PluralityVR implements VotingRule {
         }
     }
 
+    @Override
+    public ScoreVector compilationFunction(ScoreVector state, ScoreVector vote, ElectionParameters params) {
+        //preferences in vote ordered lexicographically
+        //if abstention is possible, there is an abstention vector at the end of scorevectors
+        int altCount = params.numberOfCandidates();
+        boolean abstain = params.canAbstain();
+        int absCounter = abstain ? 1 : 0;
+        ScoreVector res = null;
+        int block = (vote.getLength() - absCounter) / altCount;
+        for (int cNo = 0; cNo < altCount; cNo++) {
+            for(int index = 0; index < block; index++) {
+                int vectorIndex = cNo*block + index;
+
+                if (vote.get(vectorIndex) == 1) {
+                    int oldValue = state.getCandidate(cNo + 1);
+                    res = state.cloneAndSetCandidate(cNo + 1, oldValue + 1 );
+                }
+            }
+        }
+        // if abstention is possible, res will still be null, so need to deal with that
+        if (abstain && res == null) {
+            int absIndex = state.getLength() - 1;
+            int oldValue = state.get(absIndex);
+            res = state.cloneAndSet(absIndex, oldValue + 1 );
+        }
+
+        return res;
+    }
+
+    @Override
+    public Set<ScoreVector> generateStatesForLevel(int level, ElectionParameters params) {
+
+        return generatePossibleScoresAtLevel(level, getCompilationStateSize(params));
+    }
+
+    @Override
+    public int getCompilationStateSize(ElectionParameters params) {
+        int altCount = params.numberOfCandidates();
+        boolean abstain = params.canAbstain();
+        int absCounter = abstain ? 1 : 0;
+        return altCount + absCounter;
+    }
+
+    private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
+        assert (level >= 1);
+        Set<ScoreVector> scores = new HashSet<ScoreVector>();
+        scores.add(new ScoreVector(new int[size]));
+        for (int i = 2; i <=level; i++) {
+            Set<ScoreVector> nextScores = new HashSet<>(scores.size()*size);
+            for (ScoreVector s : scores) {
+                for (int j = 0; j < size; j++) {
+                    nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
+                }
+            }
+            scores = nextScores;
+        }
+        return scores;
+    }
 
     private ArrayList<Integer> calcWinnersOfPrefVectors(ScoreVector s, int numAlternatives, int absCounter) {
         ArrayList<Integer> res = new ArrayList<>();
@@ -92,24 +152,5 @@ public class PluralityVR implements VotingRule {
         return winners;
     }
 
-    /*@Override
-    public int getWinners(ScoreVector scores) {
-        ArrayList<Integer> winners = new ArrayList<>();
-        int maxVotes = 0;
-        for (int candidate = 1; candidate <= scores.getLength(); candidate++) {
-            if (scores.getCandidate(candidate) > maxVotes) {
-                winners.clear(); winners.add(candidate); maxVotes = scores.getCandidate(candidate);
-            }
-            else if (scores.getCandidate(candidate) == maxVotes) {
-                winners.add(candidate);
-            }
-        }
-        if (winners.size() == 1) return winners.get(0);
-        else {
-            //tie-breaker via Random
-            Random random = new Random();
-            int winner = random.nextInt(winners.size());
-            return winners.get(winner);
-        }
-    }*/
+
 }

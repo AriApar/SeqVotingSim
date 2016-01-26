@@ -15,7 +15,7 @@ public class DPElection extends Election{
     private boolean abstention;
     private boolean cost;
     private ArrayList<Voter> voters;
-    private final double COST_OF_VOTING = 0.01D;
+    private final double COST_OF_VOTING = 5D;
 
     private class Triple<X, Y, Z> {
         public final X first;
@@ -175,19 +175,17 @@ public class DPElection extends Election{
         if (abstention) numAltFactorial += 1;
         final ArrayList<ScoreVector> EVector =  generateEVectors(numAltFactorial);
         for (int j = numVoters +1; j >=1; j--) {
-            Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
+            //Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
+            Set<ScoreVector> states = getParams().getRule().generateStatesForLevel(j, getParams());
             Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
             for (ScoreVector s : states) {
-                //
 
                 if (j == numVoters + 1) {
                     getWinnersBaseCase(g, s);
-                    //
 
                 }
                 else {
                     getWinnersElseCase(g, gMap, EVector, j, s);
-                    //
                 }
             }
 
@@ -199,7 +197,9 @@ public class DPElection extends Election{
         }
 
         //return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
-        return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
+        //return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
+        int stateSize = getParams().getRule().getCompilationStateSize(getParams());
+        return generateWinnerStates(gMap.get(generateZeroVector(stateSize)), numAlternatives, stateSize);
     }
 
     private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
@@ -232,7 +232,7 @@ public class DPElection extends Election{
                     newState = prepNewState(state, candidate);
                 }
 
-                key = key.addImmutable(e);
+                key = getParams().getRule().compilationFunction(key, e, getParams());
                 //
                 Map<ScoreVector, Set<DPInfo>> g = getMapForStage(key.getSum());
                 Set<DPInfo> newInfos = g.get(key);
@@ -337,9 +337,10 @@ public class DPElection extends Election{
             ArrayList<Integer> voteCast = getParams().getRule().getWinnersOfPrefVectors(e, getParams());
             //todo: change back depending on edith
             double indUtil = (voteCast.size() == 0) ? 0D :
-                    voters.get(j-1).getCombinedUtilityForCandidates(voteCast) * 0.00001D;
+                    voters.get(j-1).getCombinedUtilityForCandidates(voteCast) / 10000D;
 
-            ScoreVector gSum = s.addImmutable(e);
+            //ScoreVector gSum = s.addImmutable(e);
+            ScoreVector gSum = getParams().getRule().compilationFunction(s, e, getParams());
 
             Set<DPInfo> cStates = gLookup.get(gSum);
             ArrayList<Integer> cWinners = cStates.iterator().next().getWinners();
@@ -350,7 +351,7 @@ public class DPElection extends Election{
             cPref = cPref - cost + indUtil;
             //double totalVoteCost = (abstention) ? getNonAbstentionCount(s) * COST_OF_VOTING : 0D;
             //todo: remove indUtil depending on edith
-            int comparison = Double.compare(cPref //+ indUtil
+            int comparison = Double.compare(cPref + indUtil
                     , bestPref);
             if(comparison == 0) {
                 // add this to current set of optimum e
@@ -375,7 +376,7 @@ public class DPElection extends Election{
     }
     private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, Map<ScoreVector, Set<DPInfo>> gLookup, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
         for (ScoreVector e : optimum_e) {
-            ScoreVector sPlusE = s.addImmutable(e);
+            ScoreVector sPlusE = getParams().getRule().compilationFunction(s, e, getParams());
             Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
             //prepare new DPInfo's
             g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
@@ -467,22 +468,6 @@ public class DPElection extends Election{
         return res;
     }
 
-
-    private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
-        assert (level >= 1);
-        Set<ScoreVector> scores = new HashSet<ScoreVector>();
-        scores.add(new ScoreVector(new int[size]));
-        for (int i = 2; i <=level; i++) {
-            Set<ScoreVector> nextScores = new HashSet<>(scores.size()*size);
-            for (ScoreVector s : scores) {
-                for (int j = 0; j < size; j++) {
-                    nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
-                }
-            }
-            scores = nextScores;
-        }
-        return scores;
-    }
 
 /*
 
