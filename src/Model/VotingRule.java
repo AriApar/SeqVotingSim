@@ -26,4 +26,6 @@ public interface VotingRule {
 
     int getCompilationStateSize(ElectionParameters params);
 
+    ArrayList<ScoreVector> generateEVectors(ElectionParameters params);
+
 }

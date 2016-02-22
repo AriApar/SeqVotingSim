@@ -101,12 +101,38 @@ public class PluralityVR implements VotingRule {
         return altCount + absCounter;
     }
 
+    @Override
+    public ArrayList<ScoreVector> generateEVectors(ElectionParameters params) {
+        int altCount = params.numberOfCandidates();
+        boolean abstain = params.canAbstain();
+        int absCounter = abstain ? 1 : 0;
+
+        int eSize = factorial(altCount) + absCounter;
+        int block = (eSize - absCounter) / altCount;
+
+        ArrayList<ScoreVector> res = new ArrayList<>();
+        ScoreVector zeroVector = new ScoreVector(eSize);
+
+        for (int j = 0; j < eSize; j++) {
+            //Only set e to 1 once for each voter (once per altCount elements)
+            if (j % block == 0) {
+                // if abstention is false, then this will return true once per each
+                // candidate
+                // if true, then it will return true once per each cand.
+                // and also once at the end, representing abstention
+                ScoreVector e = zeroVector.cloneAndSet(j, 1);
+                res.add(e);
+            }
+        }
+        return res;
+    }
+
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         assert (level >= 1);
         Set<ScoreVector> scores = new THashSet<ScoreVector>();
         scores.add(new ScoreVector(size));
         for (int i = 2; i <=level; i++) {
-            Set<ScoreVector> nextScores = new THashSet<>(scores.size()*size);
+            Set<ScoreVector> nextScores = new THashSet<>(scores.size()*size*2);
             for (ScoreVector s : scores) {
                 for (int j = 0; j < size; j++) {
                     nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
@@ -154,5 +180,10 @@ public class PluralityVR implements VotingRule {
         return winners;
     }
 
+    private int factorial(int n) {
+        int fact = 1;
+        for (int j = 1; j <=n; j++) fact *= j;
+        return fact;
+    }
 
 }

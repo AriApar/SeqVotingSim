@@ -150,6 +150,7 @@ public class DPElection extends Election{
             Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) in.readObject();
             in.close();
             fileIn.close();
+            System.out.println("Read map no " + stageNo + " from file");
             return map;
         }
         catch(IOException i)
@@ -167,14 +168,16 @@ public class DPElection extends Election{
 
     public ArrayList<ElectionState> findNE() throws Exception{
         int numVoters = voters.size();
-        //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Map<ScoreVector, Set<DPInfo>> gMap = new THashMap<>();
 
         int numAlternatives = getParams().numberOfCandidates();
         int numAltFactorial = factorial(numAlternatives);
         //add abstention possibility
         if (abstention) numAltFactorial += 1;
-        final ArrayList<ScoreVector> EVector =  generateEVectors(numAltFactorial);
+
+        //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
+        Map<ScoreVector, Set<DPInfo>> gMap = new THashMap<>();
+
+        final ArrayList<ScoreVector> EVector =  getParams().getRule().generateEVectors(getParams()); //generateEVectors(numAltFactorial);
         Set<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
             //Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
@@ -184,7 +187,7 @@ public class DPElection extends Election{
                 states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }
-            Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
+            Map<ScoreVector, Set<DPInfo>> g = new THashMap<>(states.size());
             for (ScoreVector s : states) {
 
                 if (j == numVoters + 1) {
@@ -210,7 +213,7 @@ public class DPElection extends Election{
     }
 
     private Set<ScoreVector> shrinkStatesBy1(Set<ScoreVector> states) {
-        Set<ScoreVector> res = new THashSet<>();
+        Set<ScoreVector> res = new THashSet<>(states.size());
         for (ScoreVector state : states) {
             for (int i = 0; i < state.getLength(); i++) {
                 int value = state.get(i);
@@ -222,13 +225,15 @@ public class DPElection extends Election{
 
     private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
         Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
-        Set<ElectionState> res = new HashSet<>();
+        Set<ElectionState> res = new THashSet<>(dpInfos.size() * 2);
         for (DPInfo item : dpInfos) {
             ScoreVector key = generateZeroVector(numAltFactorial);
             ElectionState initState = new ElectionState(numAlternatives);
             q.add(new Triple(initState, item, key));
 
         }
+        Map<ScoreVector, Set<DPInfo>> currMap = null;
+        int prevSum = -1; //level counter, so we don't reload the same level map
         //Initial queue done, now start processing it
         while (!q.isEmpty()) {
             Triple<ElectionState, DPInfo, ScoreVector> tuple = q.remove();
@@ -251,9 +256,13 @@ public class DPElection extends Election{
                 }
 
                 key = getParams().getRule().compilationFunction(key, e, getParams());
-                //
-                Map<ScoreVector, Set<DPInfo>> g = getMapForStage(key.getSum());
-                Set<DPInfo> newInfos = g.get(key);
+                //optimisation
+                if(key.getSum() != prevSum) {
+                    int sum = key.getSum();
+                    currMap = getMapForStage(sum);
+                    prevSum = sum;
+                }
+                Set<DPInfo> newInfos = currMap.get(key);
 
                 for (DPInfo item : newInfos) {
                     q.add(new Triple<>(newState, item, key));
@@ -391,25 +400,28 @@ public class DPElection extends Election{
         return sum;
     }
     private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, Map<ScoreVector, Set<DPInfo>> gLookup, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
+        Set<ScoreVector> seen = new THashSet<>();
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = getParams().getRule().compilationFunction(s, e, getParams());
-            Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
-            //prepare new DPInfo's
-            g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
-            if(g.containsKey(s)) {
+            if (!seen.contains(sPlusE)) {
+                seen.add(sPlusE);
+                Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
+                //prepare new DPInfo's
+                g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
+                if (g.containsKey(s)) {
 
-                for (DPInfo item : g.get(s)) g_of_sPlusE.add(item);
-                g.put(s, g_of_sPlusE);
-            }
-            else {
-                g.put(s, g_of_sPlusE);
+                    for (DPInfo item : g.get(s)) g_of_sPlusE.add(item);
+                    g.put(s, g_of_sPlusE);
+                } else {
+                    g.put(s, g_of_sPlusE);
+                }
             }
         }
     }
 
     private Set<DPInfo> prepNewInfos(Set<DPInfo> g_of_sPlusE, ScoreVector e) {
         //Same winners, new e for profiling later on
-        Set<DPInfo> res = new HashSet<>();
+        Set<DPInfo> res = new THashSet<>(g_of_sPlusE.size());
         for (DPInfo item : g_of_sPlusE) {
             res.add(new DPInfo(item.getWinners(), e));
         }
@@ -417,7 +429,7 @@ public class DPElection extends Election{
     }
 
     private void getWinnersBaseCase(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
-        Set<DPInfo> res = new HashSet<>();
+        Set<DPInfo> res = new THashSet<>();
         ArrayList<Integer> winners = getParams().getRule().getWinnersOfPrefVectors(s, getParams());
         res.add(new DPInfo(winners, null));
         g.put(s, res);

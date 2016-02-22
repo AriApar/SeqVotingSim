@@ -7,6 +7,7 @@ import gnu.trove.set.TIntSet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by AriApar on 26/11/2015.
@@ -30,13 +31,6 @@ public class ScoreVector implements Serializable {
         //this.numCandidates = scores.size();
     }
 
-    *//*public void add(ScoreVector voteVector) {
-        assert voteVector.getLength() == scores.length;
-        for (int i = 0; i < scores.length; i++) {
-            scores[i] += voteVector.get(i);
-        }
-    }*//*
-
     public ScoreVector addImmutable(ScoreVector voteVector) {
         assert (voteVector.getLength() == scores.length);
         int[] resArr = new int[scores.length];
@@ -59,11 +53,6 @@ public class ScoreVector implements Serializable {
         assert candidate > 0 && candidate <= scores.length;
         return scores[candidate-1];
     }
-
-    *//*public void set(int index, int value) {
-        assert index >= 0 && index < scores.length;
-        scores[index] = value;
-    }*//*
 
     public ScoreVector cloneAndSet(int index, int value) {
         assert (index >= 0 && index < scores.length);
@@ -109,22 +98,22 @@ public class ScoreVector implements Serializable {
     }*/
 
     //private int[] scores;
-    private TIntIntMap scores;
+    private TIntIntHashMap scores;
     private int numCandidates;
 
     public ScoreVector(int numCandidates) {
-        this.scores = new TIntIntHashMap();
+        this.scores = new TIntIntHashMap(numCandidates*2);
         this.numCandidates = numCandidates;
     }
 
-    public ScoreVector(TIntIntMap map, int numCandidates) {
+    public ScoreVector(TIntIntHashMap map, int numCandidates) {
         this.scores = map;
         this.numCandidates = numCandidates;
     }
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
-        assert (voteVector.getLength() == getLength());
-        TIntIntMap resMap = new TIntIntHashMap(voteVector.getRepresentation());
+        if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on addImmutable");
+        TIntIntHashMap resMap = new TIntIntHashMap(voteVector.getRepresentation());
         int[] keys = scores.keys();
         for (int i = 0; i < scores.size() ; i++) {
             int key = keys[i];
@@ -150,14 +139,9 @@ public class ScoreVector implements Serializable {
         return get(candidate - 1);
     }
 
-    /*public void set(int index, int value) {
-        assert index >= 0 && index < scores.length;
-        scores[index] = value;
-    }*/
-
     public ScoreVector cloneAndSet(int index, int value) {
         assert (index >= 0 && index < getLength());
-        TIntIntMap resMap = new TIntIntHashMap(scores);
+        TIntIntHashMap resMap = new TIntIntHashMap(scores);
         if(value == 0) resMap.remove(index);
         else resMap.put(index, value);
 
@@ -177,15 +161,16 @@ public class ScoreVector implements Serializable {
 
         if (numCandidates != that.numCandidates) return false;
         return scores != null ?
-                Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
+                //Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
+                scores.equals(that.scores) && numCandidates == that.numCandidates :
                 that.scores == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = scores != null ? scores.hashCode() : 0;
-        result = 31 * result + numCandidates;
+        int result = 17 * numCandidates;
+        result += scores != null ? 31*scores.hashCode() : 0;
         return result;
     }
 
