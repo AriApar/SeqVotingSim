@@ -20,6 +20,8 @@ public interface VotingRule {
 
     ArrayList<Integer> getWinnersOfPrefVectors(ScoreVector s, ElectionParameters params);
 
+    ArrayList<Integer> getWinnersOfEndState(ScoreVector s, ElectionParameters params);
+
     ScoreVector compilationFunction(ScoreVector state, ScoreVector vote, ElectionParameters params);
 
     Set<ScoreVector> generateStatesForLevel(int level, ElectionParameters params);

@@ -102,12 +102,20 @@ public class ScoreVector implements Serializable {
     private int numCandidates;
 
     public ScoreVector(int numCandidates) {
-        this.scores = new TIntIntHashMap(numCandidates*2);
+        this.scores = new TIntIntHashMap(numCandidates);
         this.numCandidates = numCandidates;
     }
 
     public ScoreVector(TIntIntHashMap map, int numCandidates) {
         this.scores = map;
+        this.numCandidates = numCandidates;
+    }
+
+    public ScoreVector(Integer[] arr, int numCandidates) {
+        this.scores = new TIntIntHashMap(arr.length);
+        for (int i =0; i< arr.length; i++){
+            if (arr[i] > 0) this.scores.put(i, arr[i]);
+        }
         this.numCandidates = numCandidates;
     }
 

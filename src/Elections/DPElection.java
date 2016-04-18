@@ -3,7 +3,6 @@ package Elections;
 import Model.*;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
@@ -184,7 +183,8 @@ public class DPElection extends Election{
             if (j == numVoters+1)
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
             else {
-                states = shrinkStatesBy1(states);
+                states = getParams().getRule().generateStatesForLevel(j, getParams());
+                //states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }
             Map<ScoreVector, Set<DPInfo>> g = new THashMap<>(states.size());
@@ -430,7 +430,7 @@ public class DPElection extends Election{
 
     private void getWinnersBaseCase(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
         Set<DPInfo> res = new THashSet<>();
-        ArrayList<Integer> winners = getParams().getRule().getWinnersOfPrefVectors(s, getParams());
+        ArrayList<Integer> winners = getParams().getRule().getWinnersOfEndState(s, getParams());
         res.add(new DPInfo(winners, null));
         g.put(s, res);
     }
