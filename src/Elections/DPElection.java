@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.*;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
+import it.unimi.dsi.fastutil.objects.*;
 
 /**
  * Created by AriApar on 01/12/2015.
@@ -174,20 +175,23 @@ public class DPElection extends Election{
         if (abstention) numAltFactorial += 1;
 
         //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Map<ScoreVector, Set<DPInfo>> gMap = new THashMap<>();
+        Map<ScoreVector, Set<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(10000);
+        //gMap.setAutoCompactionFactor(0.5f);
 
         final ArrayList<ScoreVector> EVector =  getParams().getRule().generateEVectors(getParams()); //generateEVectors(numAltFactorial);
         Set<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
-            //Set<ScoreVector> states = generatePossibleScoresAtLevel(j, numAltFactorial);
-            if (j == numVoters+1)
+            states = getParams().getRule().generateStatesForLevel(j, getParams());
+            System.out.println("Generated states for level " + j);
+            /*if (j == numVoters+1)
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
             else {
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
                 //states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
-            }
-            Map<ScoreVector, Set<DPInfo>> g = new THashMap<>(states.size());
+            }*/
+            Map<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(states.size());
+            //g.setAutoCompactionFactor(0.5f);
             for (ScoreVector s : states) {
 
                 if (j == numVoters + 1) {
@@ -202,7 +206,8 @@ public class DPElection extends Election{
             if (j != numVoters + 1) {
                 writeToFileAndClear(gMap, j);
             }
-            gMap.putAll(g);
+            gMap = g;
+            //gMap.putAll(g);
 
         }
 
@@ -281,7 +286,7 @@ public class DPElection extends Election{
     private void writeToFileAndClear(Map<ScoreVector, Set<DPInfo>> g, int j) {
         //Writes g to file and deletes it from the array
         saveMapForStage(g, j);
-        g.clear();
+        //g.clear();
     }
 
     /*private ArrayList<ElectionState> generateWinnerStates(Map<ScoreVector, Set<DPInfo>> g,
@@ -384,6 +389,7 @@ public class DPElection extends Election{
             }
             else if (comparison > 0) {
                 // new util more, trash old optimum, add this to new
+                //optimum_e = new ArrayList<>(); optimum_e.add(e); bestPref = cPref;
                 optimum_e.clear(); optimum_e.add(e); bestPref = cPref;
             }
         }

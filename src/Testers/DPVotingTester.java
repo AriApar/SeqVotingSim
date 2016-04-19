@@ -17,8 +17,10 @@ import java.util.Set;
 public class DPVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
+        System.in.read();
         try {
-            Scanner in = new Scanner(getFile("10x10Sample"));
+
+            Scanner in = new Scanner(getFile("100x3Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];
@@ -42,9 +44,12 @@ public class DPVotingTester extends AbstractTester {
             ElectionParameters params = new ElectionParameters(pref, order, rule, type);
             DPElection e = (DPElection) ElectionFactory.create(params);
 
+            long startTime = System.nanoTime();
             ArrayList<ElectionState> winners = e.findNE();
-
+            long endTime = System.nanoTime();
             printResults(order, winners);
+            System.out.println("Time elapsed on calculation: " + (endTime - startTime) + " nanoseconds");
+
 
             /*Set<ArrayList<Integer>> winners = e.findNEs();
             System.out.println("This election has " + winners.size() +

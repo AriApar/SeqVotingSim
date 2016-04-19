@@ -111,6 +111,7 @@ public class PluralityVR implements VotingRule {
     public Set<ScoreVector> generateStatesForLevel(int level, ElectionParameters params) {
 
         //return generatePossibleScoresAtLevel(level, getCompilationStateSize(params));
+        //System.out.println("Generating states for level " + level + " started");
         return generateUniqueScoresAtLevel(level, getCompilationStateSize(params));
     }
 
@@ -219,7 +220,7 @@ public class PluralityVR implements VotingRule {
         Arrays.fill(input, 0, level-1, 1);
         Arrays.fill(input, level-1, level+size-2, 0);
         Collection<List<Integer>> perms = Collections2.orderedPermutations(Arrays.<Integer>asList(input));
-        System.out.println("Perms done, size: " + perms.size());
+        //System.out.println("Perms done, size: " + perms.size());
         for (List<Integer> perm : perms) {
             //String s = buildString(perm);
             //now we split the string on the zeroes
@@ -246,7 +247,7 @@ public class PluralityVR implements VotingRule {
 
             scores.add(new ScoreVector(scoreCounts, size));
         }
-        System.out.println("Generated scores for total " + level + ", size: " + scores.size());
+        //System.out.println("Generated scores for total " + level + ", size: " + scores.size());
         return scores;
 
     }
