@@ -11,6 +11,7 @@ import java.util.*;
 
 import com.google.common.collect.Collections2;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import com.google.common.math.IntMath;
 
 
 /**
@@ -88,18 +89,21 @@ public class PluralityVR implements VotingRule {
         int absCounter = abstain ? 1 : 0;
         ScoreVector res = null;
         int block = (vote.getLength() - absCounter) / altCount;
-        for (int cNo = 0; cNo < altCount; cNo++) {
-            for(int index = 0; index < block; index++) {
-                int vectorIndex = cNo*block + index;
+        boolean done = false;
+        //done should be true when we've seen the one, as plurality allows for only one vote (ie entry with value 1)
+        //we only need to check the EVector positions for which we have a possibility of having one,
+        //as described by the evector function.
+        for (int cNo = 0; cNo < altCount && !done; cNo++) {
+            int vectorIndex = cNo*block;
 
-                if (vote.get(vectorIndex) == 1) {
-                    int oldValue = state.getCandidate(cNo + 1);
-                    res = state.cloneAndSetCandidate(cNo + 1, oldValue + 1 );
-                }
+            if (vote.get(vectorIndex) == 1) {
+                int oldValue = state.getCandidate(cNo + 1);
+                res = state.cloneAndSetCandidate(cNo + 1, oldValue + 1);
+                done = true;
             }
         }
-        // if abstention is possible, res will still be null, so need to deal with that
-        if (abstain && res == null) {
+        // if abstention, res will still be null, so need to deal with that
+        if (abstain && !done) {
             int absIndex = state.getLength() - 1;
             int oldValue = state.get(absIndex);
             res = state.cloneAndSet(absIndex, oldValue + 1 );
@@ -147,12 +151,14 @@ public class PluralityVR implements VotingRule {
                 res.add(e);
             }
         }
+        System.out.println("EVector size: " + res.size());
         return res;
+
     }
 
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         assert (level >= 1);
-        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>();
+        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>(IntMath.binomial(level + size -2, size -1));
         scores.add(new ScoreVector(size));
         for (int i = 2; i <=level; i++) {
             Set<ScoreVector> nextScores = new ObjectOpenHashSet<>();
@@ -168,16 +174,14 @@ public class PluralityVR implements VotingRule {
     }
 
     private ArrayList<Integer> calcWinnersOfPrefVectors(ScoreVector s, int numAlternatives, int absCounter) {
+        //only vectors passed in are vote vectors
+        //so we know where to find the votes
         ArrayList<Integer> res = new ArrayList<>();
         int block = (s.getLength() - absCounter)/ numAlternatives;
         int maxVotes = 0;
         int index = 0;
         for (int i = 1; i <= numAlternatives; i++) {
-            int cVotes = 0;
-            for (int j = 0; j < block; j++) {
-                cVotes += s.get(index);
-                index++;
-            }
+            int cVotes = s.get(block*(i-1));
             if (cVotes > maxVotes) {
                 res.clear();
                 res.add(i);
@@ -212,7 +216,7 @@ public class PluralityVR implements VotingRule {
     private Set<ScoreVector> generateUniqueScoresAtLevel(int level, int size) {
         //TODO: DO NOT PUT ZEROES AS A MAPPING TO SCORE VECTORS
         assert (level >= 1);
-        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>();
+        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>(IntMath.binomial(level + size -2, size -1));
         //We will use Guava's ordered permutation methods for this
         //To do that we represent the problem as permutations of a string of level-1 1's and size-1 zeroes
         //and then splitting the arrays on zeroes

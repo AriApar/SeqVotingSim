@@ -4,8 +4,12 @@ import Model.*;
 
 import java.io.*;
 import java.util.*;
+
+import com.google.common.math.IntMath;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.io.BinIO;
 import it.unimi.dsi.fastutil.objects.*;
 
 /**
@@ -126,11 +130,12 @@ public class DPElection extends Election{
         try
         {
             File f = new File(getFileName(stageNo));
-            FileOutputStream fileOut = new FileOutputStream(f);
+            BinIO.storeObject(map, f);
+            /*FileOutputStream fileOut = new FileOutputStream(f);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             out.writeObject(map);
             out.close();
-            fileOut.close();
+            fileOut.close();*/
             System.out.println("Serialized data is saved in /tmp/map_Stage_" + stageNo + ".ser");
         }
         catch(IOException i)
@@ -145,11 +150,12 @@ public class DPElection extends Election{
         try
         {
             File f = new File(getFileName(stageNo));
-            FileInputStream fileIn = new FileInputStream(f);
+            /*FileInputStream fileIn = new FileInputStream(f);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) in.readObject();
             in.close();
-            fileIn.close();
+            fileIn.close();*/
+            Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) BinIO.loadObject(f);
             System.out.println("Read map no " + stageNo + " from file");
             return map;
         }
@@ -168,20 +174,25 @@ public class DPElection extends Election{
 
     public ArrayList<ElectionState> findNE() throws Exception{
         int numVoters = voters.size();
+        VotingRule votingRule = getParams().getRule();
+
 
         int numAlternatives = getParams().numberOfCandidates();
+        //stars and bars calculation
+        int numBoxes = abstention ? numAlternatives + 1 : numAlternatives;
         int numAltFactorial = factorial(numAlternatives);
         //add abstention possibility
         if (abstention) numAltFactorial += 1;
 
         //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Map<ScoreVector, Set<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(1000000);
+        Map<ScoreVector, Set<DPInfo>> gMap = null;
         //gMap.setAutoCompactionFactor(0.5f);
 
-        final ArrayList<ScoreVector> EVector =  getParams().getRule().generateEVectors(getParams()); //generateEVectors(numAltFactorial);
+
+        final ArrayList<ScoreVector> EVector =  votingRule.generateEVectors(getParams()); //generateEVectors(numAltFactorial);
         Set<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
-            states = getParams().getRule().generateStatesForLevel(j, getParams());
+            states = votingRule.generateStatesForLevel(j, getParams());
             System.out.println("Generated states for level " + j);
             /*if (j == numVoters+1)
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
@@ -190,20 +201,17 @@ public class DPElection extends Election{
                 states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }*/
-            Map<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(states.size());
-            //g.setAutoCompactionFactor(0.5f);
-            for (ScoreVector s : states) {
-
-                if (j == numVoters + 1) {
+            Map<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
+            if (j == numVoters + 1) {
+                for (ScoreVector s : states) {
                     getWinnersBaseCase(g, s);
-
-                }
-                else {
-                    getWinnersElseCase(g, gMap, EVector, j, s);
                 }
             }
-
-            if (j != numVoters + 1) {
+            //g.setAutoCompactionFactor(0.5f);
+            else {
+                for (ScoreVector s : states) {
+                    getWinnersElseCase(g, gMap, EVector, j, s);
+                }
                 writeToFileAndClear(gMap, j);
             }
             gMap = g;
@@ -213,7 +221,7 @@ public class DPElection extends Election{
 
         //return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
         //return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
-        int stateSize = getParams().getRule().getCompilationStateSize(getParams());
+        int stateSize = votingRule.getCompilationStateSize(getParams());
         return generateWinnerStates(gMap.get(generateZeroVector(stateSize)), numAlternatives, stateSize);
     }
 

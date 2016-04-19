@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.ints.*;
  */
 public class ScoreVector implements Serializable {
 
-    /*private int[] scores;
+    private int[] scores;
     //private TIntIntHashMap scores;
     //private int numCandidates;
 
@@ -30,6 +30,13 @@ public class ScoreVector implements Serializable {
     public ScoreVector(int[] scores) {
         this.scores = scores;
         //this.numCandidates = scores.size();
+    }
+
+    public ScoreVector(Integer[] arr, int numCandidates) {
+        this.scores = new int[numCandidates];
+        for (int i =0; i< arr.length; i++){
+            if (arr[i] > 0) this.scores[i] = arr[i];
+        }
     }
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
@@ -96,11 +103,13 @@ public class ScoreVector implements Serializable {
         int sum = 0;
         for(int i = 0; i< scores.length; i++) sum += scores[i];
         return sum;
-    }*/
+    }
 
     //private int[] scores;
-    private Int2IntOpenHashMap scores;
+    /*private Int2IntOpenHashMap scores;
     private int numCandidates;
+
+    private int hashCode = 0;
 
     public ScoreVector(int numCandidates) {
         this.scores = new Int2IntOpenHashMap(numCandidates);
@@ -109,7 +118,7 @@ public class ScoreVector implements Serializable {
     }
 
     public ScoreVector(Int2IntOpenHashMap map, int numCandidates) {
-        this.scores = map;
+        this.scores = (map != null) ? map : new Int2IntOpenHashMap(numCandidates);
         scores.defaultReturnValue(0);
         this.numCandidates = numCandidates;
     }
@@ -126,7 +135,7 @@ public class ScoreVector implements Serializable {
     public ScoreVector addImmutable(ScoreVector voteVector) {
         if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on addImmutable");
         Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(voteVector.getRepresentation());
-        resMap.defaultReturnValue(0);
+        //resMap.defaultReturnValue(0);
         int[] keys = scores.keySet().toIntArray();
         for (int i = 0; i < scores.size() ; i++) {
             int key = keys[i];
@@ -155,7 +164,7 @@ public class ScoreVector implements Serializable {
     public ScoreVector cloneAndSet(int index, int value) {
         assert (index >= 0 && index < getLength());
         Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(scores);
-        resMap.defaultReturnValue(0);
+        //resMap.defaultReturnValue(0);
         if(value == 0) resMap.remove(index);
         else resMap.put(index, value);
 
@@ -173,19 +182,20 @@ public class ScoreVector implements Serializable {
 
         ScoreVector that = (ScoreVector) o;
 
-        //if (numCandidates != that.numCandidates) return false;
-        return scores != null ?
-                //Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
-                scores.equals(that.scores) ://&& numCandidates == that.numCandidates :
-                that.scores == null;
+        if (hashCode != that.hashCode()) return false;
+        return  //Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
+                scores.equals(that.scores) ;//&& numCandidates == that.numCandidates :
 
     }
 
     @Override
     public int hashCode() {
-        int result = 0;//17 * numCandidates;
-        result += scores != null ? 31*scores.hashCode() : 0;
-        return result;
+        if (hashCode == 0) {
+            int result = 11;//17 * numCandidates;
+            result = scores != null ? result * 37 + scores.hashCode() : result;
+            hashCode = result;
+        }
+        return hashCode;
     }
 
     public ScoreVector cloneAndSetCandidate(int candidate, int value) {
@@ -209,5 +219,5 @@ public class ScoreVector implements Serializable {
         for(int i = 0; i< values.length; i++) sum += values[i];
         return sum;
     }
-
+*/
 }
