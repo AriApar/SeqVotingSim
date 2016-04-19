@@ -99,35 +99,39 @@ public class ScoreVector implements Serializable {
     }*/
 
     //private int[] scores;
-    private TIntIntHashMap scores;
+    private Int2IntOpenHashMap scores;
     private int numCandidates;
 
     public ScoreVector(int numCandidates) {
-        this.scores = new TIntIntHashMap(numCandidates);
+        this.scores = new Int2IntOpenHashMap(numCandidates);
+        scores.defaultReturnValue(0);
         this.numCandidates = numCandidates;
     }
 
-    public ScoreVector(TIntIntHashMap map, int numCandidates) {
+    public ScoreVector(Int2IntOpenHashMap map, int numCandidates) {
         this.scores = map;
+        scores.defaultReturnValue(0);
         this.numCandidates = numCandidates;
     }
 
     public ScoreVector(Integer[] arr, int numCandidates) {
-        this.scores = new TIntIntHashMap(arr.length);
+        this.scores = new Int2IntOpenHashMap(arr.length);
+        scores.defaultReturnValue(0);
         for (int i =0; i< arr.length; i++){
-            if (arr[i] > 0) this.scores.put(i, arr[i]);
+            if (arr[i] > 0) this.scores.put(i, (int) arr[i]);
         }
         this.numCandidates = numCandidates;
     }
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
         if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on addImmutable");
-        TIntIntHashMap resMap = new TIntIntHashMap(voteVector.getRepresentation());
-        int[] keys = scores.keys();
+        Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(voteVector.getRepresentation());
+        resMap.defaultReturnValue(0);
+        int[] keys = scores.keySet().toIntArray();
         for (int i = 0; i < scores.size() ; i++) {
             int key = keys[i];
             int value = scores.get(key);
-            int newValue = resMap.adjustOrPutValue(key, value, value);
+            int newValue = resMap.addTo(key, value);
             // if new value is 0 remove from map!
             if(newValue == 0) resMap.remove(i);
         }
@@ -150,15 +154,16 @@ public class ScoreVector implements Serializable {
 
     public ScoreVector cloneAndSet(int index, int value) {
         assert (index >= 0 && index < getLength());
-        TIntIntHashMap resMap = new TIntIntHashMap(scores);
+        Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(scores);
+        resMap.defaultReturnValue(0);
         if(value == 0) resMap.remove(index);
         else resMap.put(index, value);
 
         return new ScoreVector(resMap, getLength());
     }
 
-    public TIntIntMap getRepresentation() {
-        return new TIntIntHashMap(scores);
+    public Int2IntOpenHashMap getRepresentation() {
+        return new Int2IntOpenHashMap(scores);
     }
 
     @Override
@@ -168,17 +173,17 @@ public class ScoreVector implements Serializable {
 
         ScoreVector that = (ScoreVector) o;
 
-        if (numCandidates != that.numCandidates) return false;
+        //if (numCandidates != that.numCandidates) return false;
         return scores != null ?
                 //Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
-                scores.equals(that.scores) && numCandidates == that.numCandidates :
+                scores.equals(that.scores) ://&& numCandidates == that.numCandidates :
                 that.scores == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = 17 * numCandidates;
+        int result = 0;//17 * numCandidates;
         result += scores != null ? 31*scores.hashCode() : 0;
         return result;
     }
@@ -200,7 +205,7 @@ public class ScoreVector implements Serializable {
 
     public int getSum() {
         int sum = 0;
-        int[] values = scores.values();
+        int[] values = scores.values().toIntArray();
         for(int i = 0; i< values.length; i++) sum += values[i];
         return sum;
     }

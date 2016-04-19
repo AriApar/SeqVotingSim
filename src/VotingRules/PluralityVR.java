@@ -10,6 +10,7 @@ import gnu.trove.set.hash.THashSet;
 import java.util.*;
 
 import com.google.common.collect.Collections2;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 
 /**
@@ -151,10 +152,10 @@ public class PluralityVR implements VotingRule {
 
     private Set<ScoreVector> generatePossibleScoresAtLevel(int level, int size) {
         assert (level >= 1);
-        Set<ScoreVector> scores = new THashSet<ScoreVector>();
+        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>();
         scores.add(new ScoreVector(size));
         for (int i = 2; i <=level; i++) {
-            Set<ScoreVector> nextScores = new THashSet<>();
+            Set<ScoreVector> nextScores = new ObjectOpenHashSet<>();
             for (ScoreVector s : scores) {
                 for (int j = 0; j < size; j++) {
                     nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
@@ -211,7 +212,7 @@ public class PluralityVR implements VotingRule {
     private Set<ScoreVector> generateUniqueScoresAtLevel(int level, int size) {
         //TODO: DO NOT PUT ZEROES AS A MAPPING TO SCORE VECTORS
         assert (level >= 1);
-        Set<ScoreVector> scores = new THashSet<ScoreVector>();
+        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>();
         //We will use Guava's ordered permutation methods for this
         //To do that we represent the problem as permutations of a string of level-1 1's and size-1 zeroes
         //and then splitting the arrays on zeroes

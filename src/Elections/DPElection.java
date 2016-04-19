@@ -175,7 +175,7 @@ public class DPElection extends Election{
         if (abstention) numAltFactorial += 1;
 
         //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Map<ScoreVector, Set<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(10000);
+        Map<ScoreVector, Set<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(1000000);
         //gMap.setAutoCompactionFactor(0.5f);
 
         final ArrayList<ScoreVector> EVector =  getParams().getRule().generateEVectors(getParams()); //generateEVectors(numAltFactorial);
@@ -186,8 +186,8 @@ public class DPElection extends Election{
             /*if (j == numVoters+1)
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
             else {
-                states = getParams().getRule().generateStatesForLevel(j, getParams());
-                //states = shrinkStatesBy1(states);
+                //states = getParams().getRule().generateStatesForLevel(j, getParams());
+                states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }*/
             Map<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(states.size());
@@ -218,7 +218,7 @@ public class DPElection extends Election{
     }
 
     private Set<ScoreVector> shrinkStatesBy1(Set<ScoreVector> states) {
-        Set<ScoreVector> res = new THashSet<>(states.size());
+        Set<ScoreVector> res = new ObjectOpenHashSet<>(states.size());
         for (ScoreVector state : states) {
             for (int i = 0; i < state.getLength(); i++) {
                 int value = state.get(i);
@@ -230,7 +230,7 @@ public class DPElection extends Election{
 
     private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
         Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
-        Set<ElectionState> res = new THashSet<>(dpInfos.size() * 2);
+        Set<ElectionState> res = new ObjectOpenHashSet<>(dpInfos.size() * 2);
         for (DPInfo item : dpInfos) {
             ScoreVector key = generateZeroVector(numAltFactorial);
             ElectionState initState = new ElectionState(numAlternatives);
@@ -406,7 +406,7 @@ public class DPElection extends Election{
         return sum;
     }
     private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, Map<ScoreVector, Set<DPInfo>> gLookup, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
-        Set<ScoreVector> seen = new THashSet<>();
+        Set<ScoreVector> seen = new ObjectOpenHashSet<>();
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = getParams().getRule().compilationFunction(s, e, getParams());
             if (!seen.contains(sPlusE)) {
@@ -427,7 +427,7 @@ public class DPElection extends Election{
 
     private Set<DPInfo> prepNewInfos(Set<DPInfo> g_of_sPlusE, ScoreVector e) {
         //Same winners, new e for profiling later on
-        Set<DPInfo> res = new THashSet<>(g_of_sPlusE.size());
+        Set<DPInfo> res = new ObjectOpenHashSet<>(g_of_sPlusE.size());
         for (DPInfo item : g_of_sPlusE) {
             res.add(new DPInfo(item.getWinners(), e));
         }
@@ -435,7 +435,7 @@ public class DPElection extends Election{
     }
 
     private void getWinnersBaseCase(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
-        Set<DPInfo> res = new THashSet<>();
+        Set<DPInfo> res = new ObjectOpenHashSet<>();
         ArrayList<Integer> winners = getParams().getRule().getWinnersOfEndState(s, getParams());
         res.add(new DPInfo(winners, null));
         g.put(s, res);
