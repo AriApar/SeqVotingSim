@@ -136,7 +136,7 @@ public class DPElection extends Election{
             out.writeObject(map);
             out.close();
             fileOut.close();*/
-            System.out.println("Serialized data is saved in /tmp/map_Stage_" + stageNo + ".ser");
+            //System.out.println("Serialized data is saved in /tmp/map_Stage_" + stageNo + ".ser");
         }
         catch(IOException i)
         {
@@ -180,12 +180,12 @@ public class DPElection extends Election{
         int numAlternatives = getParams().numberOfCandidates();
         //stars and bars calculation
         int numBoxes = abstention ? numAlternatives + 1 : numAlternatives;
-        int numAltFactorial = factorial(numAlternatives);
+
         //add abstention possibility
-        if (abstention) numAltFactorial += 1;
+
 
         //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Map<ScoreVector, Set<DPInfo>> gMap = null;
+        Object2ObjectOpenHashMap<ScoreVector, Set<DPInfo>> gMap = null;
         //gMap.setAutoCompactionFactor(0.5f);
 
 
@@ -201,7 +201,7 @@ public class DPElection extends Election{
                 states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }*/
-            Map<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
+            Object2ObjectOpenHashMap<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
             if (j == numVoters + 1) {
                 for (ScoreVector s : states) {
                     getWinnersBaseCase(g, s);
@@ -238,7 +238,8 @@ public class DPElection extends Election{
 
     private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
         Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
-        Set<ElectionState> res = new ObjectOpenHashSet<>(dpInfos.size() * 2);
+        //Set<ElectionState> res = new ObjectOpenHashSet<>(dpInfos.size() * 2);
+        ArrayList<ElectionState> res = new ArrayList<>();
         for (DPInfo item : dpInfos) {
             ScoreVector key = generateZeroVector(numAltFactorial);
             ElectionState initState = new ElectionState(numAlternatives);
@@ -288,7 +289,8 @@ public class DPElection extends Election{
                 else throw new Exception("winner states from mapping not consistent with generated electionstate");
             }
         }
-        return new ArrayList<>(res);
+        //return new ArrayList<>(res);
+        return res;
     }
 
     private void writeToFileAndClear(Map<ScoreVector, Set<DPInfo>> g, int j) {
@@ -413,7 +415,9 @@ public class DPElection extends Election{
         }
         return sum;
     }
-    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g, Map<ScoreVector, Set<DPInfo>> gLookup, ScoreVector s, ArrayList<ScoreVector> optimum_e) {
+    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g,
+                                         Map<ScoreVector, Set<DPInfo>> gLookup,
+                                         ScoreVector s, ArrayList<ScoreVector> optimum_e) {
         Set<ScoreVector> seen = new ObjectOpenHashSet<>();
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = getParams().getRule().compilationFunction(s, e, getParams());
@@ -422,11 +426,14 @@ public class DPElection extends Election{
                 Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
                 //prepare new DPInfo's
                 g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
+                //g.get(s).addAll(g_of_sPlusE);
                 if (g.containsKey(s)) {
-
-                    for (DPInfo item : g.get(s)) g_of_sPlusE.add(item);
+                    // todo: optimize this
+                    //for (DPInfo item : g.get(s)) g_of_sPlusE.add(item);
+                    g_of_sPlusE.addAll(g.get(s));
                     g.put(s, g_of_sPlusE);
-                } else {
+                }
+                else {
                     g.put(s, g_of_sPlusE);
                 }
             }
