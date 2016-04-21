@@ -1,8 +1,5 @@
 package Model;
 
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,6 +16,7 @@ import it.unimi.dsi.fastutil.ints.*;
 public class ScoreVector implements Serializable {
 
     private int[] scores;
+    //private int hashCode;
     //private TIntIntHashMap scores;
     //private int numCandidates;
 
@@ -79,15 +77,13 @@ public class ScoreVector implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         ScoreVector that = (ScoreVector) o;
-
+        //if (hashCode() != that.hashCode()) return false;
         return Arrays.equals(scores, that.scores);
 
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(scores);
-    }
+    public int hashCode() { return Arrays.hashCode(scores);}
 
     public ScoreVector cloneAndSetCandidate(int candidate, int value) {
         assert candidate > 0 && candidate <= scores.length;

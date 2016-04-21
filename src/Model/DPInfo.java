@@ -10,10 +10,13 @@ public class DPInfo implements Serializable {
     private ArrayList<Integer> winners;
     private ScoreVector prefE;
 
+    private int hashCode = 0;
+
     public DPInfo(ArrayList<Integer> winners, ScoreVector prefVector) {
         this.winners = winners;
         this.prefE = prefVector;
         this.winners.trimToSize();
+        //hashCode();
     }
 
     public ArrayList<Integer> getWinners() {
@@ -31,15 +34,19 @@ public class DPInfo implements Serializable {
 
         DPInfo dpInfo = (DPInfo) o;
 
-        if (winners != null ? !winners.equals(dpInfo.winners) : dpInfo.winners != null) return false;
-        return prefE != null ? prefE.equals(dpInfo.prefE) : dpInfo.prefE == null;
+        //if (hashCode != dpInfo.hashCode()) return false;
+        if (prefE != null ? prefE.equals(dpInfo.prefE) : dpInfo.prefE == null) return false;
+        return winners != null ? !winners.equals(dpInfo.winners) : dpInfo.winners != null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = winners != null ? winners.hashCode() : 0;
-        result = 31 * result + (prefE != null ? prefE.hashCode() : 0);
-        return result;
+        if (hashCode == 0) {
+            int result = winners != null ? winners.hashCode() : 0;
+            result = 31 * result + (prefE != null ? prefE.hashCode() : 0);
+            hashCode = result;
+        }
+        return hashCode;
     }
 }

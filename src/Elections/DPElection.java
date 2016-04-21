@@ -4,10 +4,12 @@ import Model.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.math.IntMath;
-import gnu.trove.map.hash.THashMap;
-import gnu.trove.set.hash.THashSet;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.io.BinIO;
 import it.unimi.dsi.fastutil.objects.*;
@@ -156,7 +158,7 @@ public class DPElection extends Election{
             in.close();
             fileIn.close();*/
             Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) BinIO.loadObject(f);
-            System.out.println("Read map no " + stageNo + " from file");
+            //System.out.println("Read map no " + stageNo + " from file");
             return map;
         }
         catch(IOException i)
@@ -193,7 +195,7 @@ public class DPElection extends Election{
         Set<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
             states = votingRule.generateStatesForLevel(j, getParams());
-            System.out.println("Generated states for level " + j);
+            //System.out.println("Generated states for level " + j);
             /*if (j == numVoters+1)
                 states = getParams().getRule().generateStatesForLevel(j, getParams());
             else {
@@ -442,6 +444,9 @@ public class DPElection extends Election{
 
     private Set<DPInfo> prepNewInfos(Set<DPInfo> g_of_sPlusE, ScoreVector e) {
         //Same winners, new e for profiling later on
+        /*Set<DPInfo> res = g_of_sPlusE.stream()
+                                .map(dpInfo -> new DPInfo(dpInfo.getWinners(), e))
+                                .collect(Collectors.toCollection(ObjectOpenHashSet<DPInfo>::new));*/
         Set<DPInfo> res = new ObjectOpenHashSet<>(g_of_sPlusE.size());
         for (DPInfo item : g_of_sPlusE) {
             res.add(new DPInfo(item.getWinners(), e));

@@ -5,7 +5,6 @@ import Model.Preferences;
 import Model.ScoreVector;
 import Model.VotingRule;
 import com.google.common.base.Strings;
-import gnu.trove.set.hash.THashSet;
 
 import java.util.*;
 
@@ -151,7 +150,7 @@ public class PluralityVR implements VotingRule {
                 res.add(e);
             }
         }
-        System.out.println("EVector size: " + res.size());
+        //System.out.println("EVector size: " + res.size());
         return res;
 
     }
@@ -168,7 +167,7 @@ public class PluralityVR implements VotingRule {
                 }
             }
             scores = nextScores;
-            System.out.println("Generated scores for level " + i + ", size: " + scores.size());
+            //System.out.println("Generated scores for level " + i + ", size: " + scores.size());
         }
         return scores;
     }
