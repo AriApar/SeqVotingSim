@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SeqVotingSim:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SeqVotingSim_jar</output-path>
+    <root id="archive" name="SeqVotingSim.jar">
+      <element id="module-output" name="SeqVotingSim" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/it/unimi/dsi/fastutil/7.0.12/fastutil-7.0.12.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

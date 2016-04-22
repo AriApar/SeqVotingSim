@@ -1,7 +1,10 @@
-package Testers;
+package me.ariapar.Processor;
 
-import Elections.ElectionState;
+import Elections.*;
+import Model.PreferenceList;
 import Model.VotingOrder;
+import Model.VotingRule;
+import VotingRules.PluralityVR;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,48 +14,61 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.stream.IntStream;
+import java.util.Scanner;
 
 /**
- * Created by AriApar on 13/01/2016.
+ * Created by AriApar on 22/04/2016.
  */
-public class AbstractTester {
+public class SampleFileProcessor implements Runnable {
+    private Path p;
+    private String[] args;
 
-    public static File getFile(String fileName) {
-
-        //Get file from resources folder
-
-        File file = new File("res/PlistExamples/" + fileName);
-        return file;
+    public SampleFileProcessor(Path p, String[] args) {
+        this.p = p;
+        this.args = args;
     }
 
-    public static void printResults(VotingOrder order, ArrayList<ElectionState> winners) {
-        System.out.println("This election has " + winners.size() +
-                " Nash equilibria!");
-        Iterator<ElectionState> it = winners.iterator();
-        for (int i = 1; i<= winners.size(); i++) {
-            System.out.println("Nash Equilibrium " + i + ":");
-            System.out.print("The winner is candidate(s) ");
-            ElectionState wins = it.next();
-            //Print winners
-            ArrayList<Integer> elected = wins.getCurrentWinners();
-            for (int j = 0; j < elected.size() - 1; j++) System.out.print(elected.get(j) + ", ");
-            System.out.println(elected.get(elected.size() -1));
-            //Print vote distribution
-            System.out.println("Vote Distribution: " + wins.getCurrentScores().toString());
-            //Print votes cast by each voter
-            System.out.println("Votes Cast (in order): ");
-            Iterator<Integer> iter = wins.getCurrentVotes().iterator();
-            for (Integer v : order) {
-                System.out.println("Voter " + v + ": Candidate " +  iter.next());
+    @Override
+    public void run() {
+        try {
+            Scanner in = new Scanner(p);
+            int voters = in.nextInt();
+            int candidates = in.nextInt();
+            int[][] prefList = new int[voters][candidates];
+            for (int i = 0; i < voters; i++) {
+                for (int j = 0; j < candidates; j++) {
+                    prefList[i][j] = in.nextInt();
+                }
             }
+            ElectionType type = ElectionType.DP;
+            if (args.length > 0) {
+                if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
+                else if (args[0].equals("-ac")) {
+                    type = ElectionType.DPWITHCOSTLYABS;
+                }
+            }
+
+            PreferenceList pref = new PreferenceList(prefList);
+            VotingOrder order = new VotingOrder(voters, true);
+            VotingRule rule = new PluralityVR(candidates);
+
+            ElectionParameters params = new ElectionParameters(pref, order, rule, type);
+            DPElection e = (DPElection) ElectionFactory.create(params);
+
+            long startTime = System.nanoTime();
+            ArrayList<ElectionState> winners = e.findNE();
+            long endTime = System.nanoTime();
+            saveResultsToFile(order, winners, (endTime - startTime), p);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(p.toString());
         }
     }
 
     public static void saveResultsToFile(VotingOrder order, ArrayList<ElectionState> winners,
                                          long time, Path path) {
         //make the directory if needed
-        String directoryPath = path.getParent().getParent().toString() + "/results/";
+        String directoryPath = "results/";
         File f = new File(directoryPath);
         f.mkdirs();
         //get file path
@@ -70,8 +86,10 @@ public class AbstractTester {
                 ElectionState wins = it.next();
                 //Print winners
                 ArrayList<Integer> elected = wins.getCurrentWinners();
+                //System.out.println(elected.toString());
+
                 for (int j = 0; j < elected.size() - 1; j++) writer.write(elected.get(j) + ", ");
-                writer.write(elected.get(elected.size() -1));
+                writer.write(elected.get(elected.size() -1).toString());
                 writer.newLine();
                 //Print vote distribution
                 writer.write("Vote Distribution: " + wins.getCurrentScores().toString());
@@ -91,6 +109,7 @@ public class AbstractTester {
             }
             writer.write("Time taken: " + time + " nanoseconds");
             writer.close();
+            System.out.println("File " + path.getFileName().toString() + " done.");
         }
         catch (Exception e) {
             e.printStackTrace();
