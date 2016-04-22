@@ -7,9 +7,14 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/res/PListExamples" />
+      <excludeFolder url="file://$MODULE_DIR$/res/PListSamples" />
       <excludeFolder url="file://$MODULE_DIR$/res/results" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp1" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp10" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp11" />
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />

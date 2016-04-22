@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="18c2f4c5-e536-4633-a806-2c1487713633" name="ug12aa2@ecs.ox.ac.uk" url="http://ecs.ox.ac.uk">
+        <fileTransfer host="ecs.ox.ac.uk" port="22" rootFolder="/auto/users/ug12aa2" accessType="SFTP" password="dfe1dfc9dfc7dfcbdf87df9bdf93df92df98" username="ug12aa2">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

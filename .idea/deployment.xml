@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="ug12aa2@ecs.ox.ac.uk">
+    <serverData>
+      <paths name="ug12aa2@ecs.ox.ac.uk">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/SeqVotingSim" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/res/results" />
+            <excludedPath local="true" path="$PROJECT_DIR$/res/PListSamples" />
+            <excludedPath local="true" path="$PROJECT_DIR$/tmp" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
