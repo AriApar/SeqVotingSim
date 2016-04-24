@@ -7,7 +7,9 @@ import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,12 +21,28 @@ import java.util.concurrent.TimeUnit;
 public class DPVotingExecutor {
 
     public static void main(String[] args) {
-        ExecutorService threadPool = Executors.newFixedThreadPool(2);
+        ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        File resDirectory = new File(Paths.get("results").toString());
+        resDirectory.mkdirs();
+        File[] alreadyTestedFiles = resDirectory.listFiles();
+
+        ArrayList<String> fileNames = new ArrayList<>();
+        if (alreadyTestedFiles != null) {
+            for (File testedFile : alreadyTestedFiles) {
+                fileNames.add(testedFile.getName());
+            }
+        }
+
+        Collections.sort(fileNames);
+
         File[] files = new File(Paths.get("res", "PListSamples").toString())
                 .listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.contains("Sample");
+                int index = Collections.binarySearch(fileNames, name);
+                int size = fileNames.size();
+
+                return name.contains("2x") && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
             }
         });
 

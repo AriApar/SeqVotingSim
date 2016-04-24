@@ -8,6 +8,7 @@ import VotingRules.PluralityVR;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ public class SampleFileProcessor implements Runnable {
                     prefList[i][j] = in.nextInt();
                 }
             }
+            in.close();
             ElectionType type = ElectionType.DP;
             if (args.length > 0) {
                 if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
@@ -73,8 +75,9 @@ public class SampleFileProcessor implements Runnable {
         f.mkdirs();
         //get file path
         Path p = Paths.get(directoryPath, path.getFileName().toString());
+        BufferedWriter writer = null;
         try {
-            BufferedWriter writer = Files.newBufferedWriter(p, StandardCharsets.UTF_8);
+            writer = Files.newBufferedWriter(p, StandardCharsets.UTF_8);
             writer.write("This election has " + winners.size() +
                     " Nash equilibria!");
             writer.newLine();
@@ -108,12 +111,21 @@ public class SampleFileProcessor implements Runnable {
 
             }
             writer.write("Time taken: " + time + " nanoseconds");
-            writer.close();
-            System.out.println("File " + path.getFileName().toString() + " done.");
+
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                writer.close();
+                System.out.println("File " + path.getFileName().toString() + " done.");
+            } catch (IOException ex) {
+                // Log error writing file and bail out.
+                ex.printStackTrace();
+            }
+        }
+
 
     }
 }
