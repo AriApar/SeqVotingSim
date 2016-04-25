@@ -16,13 +16,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by AriApar on 22/04/2016.
+ * Created by AriApar on 25/04/2016.
  */
-public class DPVotingExecutor {
+public class BackInductionVotingExecutor {
 
     public static void main(String[] args) {
         ExecutorService threadPool = Executors.newFixedThreadPool(1);
-        File resDirectory = new File(Paths.get("results").toString());
+        File resDirectory = new File(Paths.get("tree/results").toString());
         resDirectory.mkdirs();
         File[] alreadyTestedFiles = resDirectory.listFiles();
 
@@ -37,14 +37,14 @@ public class DPVotingExecutor {
 
         File[] files = new File(Paths.get("res", "PListSamples").toString())
                 .listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                int index = Collections.binarySearch(fileNames, name);
-                int size = fileNames.size();
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        int index = Collections.binarySearch(fileNames, name);
+                        int size = fileNames.size();
 
-                return name.contains("3x25S") && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
-            }
-        });
+                        return name.contains("3x10S") && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
+                    }
+                });
 
         Arrays.sort( files, new Comparator<File>() {
             public int compare( File a, File b ) {

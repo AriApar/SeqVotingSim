@@ -2,6 +2,8 @@ package Elections;
 
 import Model.*;
 
+import java.util.ArrayList;
+
 /**
  * Created by AriApar on 25/11/2015.
  */
@@ -23,5 +25,10 @@ public class TruthfulElection extends Election {
             scores = scores.addImmutable(v.vote());
         }
         return scores;
+    }
+
+    @Override
+    public ArrayList<ElectionState> findNE() throws Exception {
+        throw new UnsupportedOperationException("TruthfulElection is executed via run() method");
     }
 }

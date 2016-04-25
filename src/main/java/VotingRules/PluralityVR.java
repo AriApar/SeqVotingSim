@@ -11,6 +11,7 @@ import java.util.*;
 import com.google.common.collect.Collections2;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import com.google.common.math.IntMath;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 
 
 /**
@@ -112,7 +113,7 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public Set<ScoreVector> generateStatesForLevel(int level, ElectionParameters params) {
+    public List<ScoreVector> generateStatesForLevel(int level, ElectionParameters params) {
 
         //return generatePossibleScoresAtLevel(level, getCompilationStateSize(params));
         //System.out.println("Generating states for level " + level + " started");
@@ -212,10 +213,10 @@ public class PluralityVR implements VotingRule {
         return fact;
     }
 
-    private Set<ScoreVector> generateUniqueScoresAtLevel(int level, int size) {
-        //TODO: DO NOT PUT ZEROES AS A MAPPING TO SCORE VECTORS
+    private List<ScoreVector> generateUniqueScoresAtLevel(int level, int size) {
+        //DO NOT PUT ZEROES AS A MAPPING TO SCORE VECTORS
         assert (level >= 1);
-        Set<ScoreVector> scores = new ObjectOpenHashSet<ScoreVector>(IntMath.binomial(level + size -2, size -1));
+        List<ScoreVector> scores = new LinkedList<ScoreVector>();
         //We will use Guava's ordered permutation methods for this
         //To do that we represent the problem as permutations of a string of level-1 1's and size-1 zeroes
         //and then splitting the arrays on zeroes
@@ -230,19 +231,19 @@ public class PluralityVR implements VotingRule {
             //now we split the string on the zeroes
             //String[] splitPerm = s.split("0", size);
             //assert splitPerm.length == size;
-            Integer[] arrPerm = perm.toArray(new Integer[perm.size()]);
+            //Integer[] arrPerm = perm.toArray(new Integer[perm.size()]);
             Integer[] scoreCounts = new Integer[size];
             int index = 0; int count = 0; boolean done = false;
-            for (int i=0; i<arrPerm.length && !done; i++) {
+            for (int i=0; i< perm.size() && !done; i++) {
 
-                if (arrPerm[i] == 1) count += 1;
+                if (perm.get(i) == 1) count += 1;
                 else {
                     scoreCounts[index] = count;
                     index += 1;
                     count = 0;
                     if (index == size - 1) {
                         // rest is abstention, just write it down and set done
-                        scoreCounts[index] = arrPerm.length - i -1;
+                        scoreCounts[index] = perm.size() - i -1;
                         done = true;
                     }
                 }
@@ -250,8 +251,10 @@ public class PluralityVR implements VotingRule {
             }
 
             scores.add(new ScoreVector(scoreCounts, size));
+            input = null;
         }
         //System.out.println("Generated scores for total " + level + ", size: " + scores.size());
+        perms = null;
         return scores;
 
     }

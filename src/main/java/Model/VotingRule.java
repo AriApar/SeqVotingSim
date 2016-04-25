@@ -4,6 +4,7 @@ import Elections.Election;
 import Elections.ElectionParameters;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +25,7 @@ public interface VotingRule {
 
     ScoreVector compilationFunction(ScoreVector state, ScoreVector vote, ElectionParameters params);
 
-    Set<ScoreVector> generateStatesForLevel(int level, ElectionParameters params);
+    List<ScoreVector> generateStatesForLevel(int level, ElectionParameters params);
 
     int getCompilationStateSize(ElectionParameters params);
 

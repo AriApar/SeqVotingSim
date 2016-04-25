@@ -17,10 +17,10 @@ import java.util.Set;
 public class DPVotingTester extends AbstractTester {
 
     public static void main(String[] args) throws Exception{
-        System.in.read();
+        //System.in.read();
         try {
 
-            Scanner in = new Scanner(getFile("3x3Sample"));
+            Scanner in = new Scanner(getFile("10x10Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];

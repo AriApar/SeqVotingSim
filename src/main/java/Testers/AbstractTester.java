@@ -22,7 +22,7 @@ public class AbstractTester {
 
         //Get file from resources folder
 
-        File file = new File("res/PlistExamples/" + fileName);
+        File file = new File("res/PListExamples/" + fileName);
         return file;
     }
 

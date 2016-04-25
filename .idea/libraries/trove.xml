@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="trove">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/trove4j-trove-a6ac7ec39440/core/build/libs/trove.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -65,4 +65,6 @@ public abstract class Election {
             return winners.get(winner);
         }
     }
+
+    public abstract ArrayList<ElectionState> findNE() throws Exception;
 }

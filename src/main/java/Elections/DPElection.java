@@ -3,6 +3,7 @@ package Elections;
 import Model.*;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class DPElection extends Election{
     private boolean cost;
     private ArrayList<Voter> voters;
     private final double COST_OF_VOTING = 5D;
+    private Map<ScoreVector, List<DPInfo>>[] mapArr;
 
     private class Triple<X, Y, Z> {
         public final X first;
@@ -40,6 +42,7 @@ public class DPElection extends Election{
         abstention = params.canAbstain();
         cost = params.hasCost();
         voters = getVoters();
+        mapArr = (Map<ScoreVector, List<DPInfo>>[]) Array.newInstance(Object2ObjectOpenHashMap.class, voters.size() +1);// Object2ObjectOpenHashMap<ScoreVector, Set<DPInfo>>[voters.size() +1];
     }
 
     /*public Set<ArrayList<Integer>> findNE() throws Exception{
@@ -128,37 +131,39 @@ public class DPElection extends Election{
         return "tmp" + Thread.currentThread().getId() + "/map_Stage_" + stageNo + ".ser";
     }
 
-    private boolean saveMapForStage(Map<ScoreVector, Set<DPInfo>> map, int stageNo ) {
-        try
+    private boolean saveMapForStage(Map<ScoreVector, List<DPInfo>> map, int stageNo) {
+        mapArr[stageNo] = map;
+        /*try
         {
             File f = new File(getFileName(stageNo));
             f.getParentFile().mkdirs();
             BinIO.storeObject(map, f);
-            /*FileOutputStream fileOut = new FileOutputStream(f);
+            *//*FileOutputStream fileOut = new FileOutputStream(f);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             out.writeObject(map);
             out.close();
-            fileOut.close();*/
+            fileOut.close();*//*
             //System.out.println("Serialized data is saved in /tmp/map_Stage_" + stageNo + ".ser");
         }
         catch(IOException i)
         {
             i.printStackTrace();
             return false;
-        }
+        }*/
         return true;
     }
 
-    private Map<ScoreVector, Set<DPInfo>> getMapForStage(int stageNo) {
-        try
+    private Map<ScoreVector, List<DPInfo>> getMapForStage(int stageNo) {
+        return mapArr[stageNo];
+        /*try
         {
             File f = new File(getFileName(stageNo));
-            /*FileInputStream fileIn = new FileInputStream(f);
+            *//*FileInputStream fileIn = new FileInputStream(f);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) in.readObject();
             in.close();
-            fileIn.close();*/
-            Map<ScoreVector, Set<DPInfo>> map = (Map<ScoreVector, Set<DPInfo>>) BinIO.loadObject(f);
+            fileIn.close();*//*
+            Map<ScoreVector, List<DPInfo>> map = (Map<ScoreVector, List<DPInfo>>) BinIO.loadObject(f);
             //System.out.println("Read map no " + stageNo + " from file");
             return map;
         }
@@ -172,7 +177,7 @@ public class DPElection extends Election{
             System.out.println("Map class not found");
             c.printStackTrace();
             return null;
-        }
+        }*/
     }
 
     public ArrayList<ElectionState> findNE() throws Exception{
@@ -188,12 +193,12 @@ public class DPElection extends Election{
 
 
         //Map<ScoreVector, Set<DPInfo>> g = new THashMap<>();
-        Object2ObjectOpenHashMap<ScoreVector, Set<DPInfo>> gMap = null;
+        Object2ObjectOpenHashMap<ScoreVector, List<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(IntMath.binomial(numVoters + numBoxes - 2, numBoxes -1));
         //gMap.setAutoCompactionFactor(0.5f);
 
 
         final ArrayList<ScoreVector> EVector =  votingRule.generateEVectors(getParams()); //generateEVectors(numAltFactorial);
-        Set<ScoreVector> states = null;
+        List<ScoreVector> states = null;
         for (int j = numVoters +1; j >=1; j--) {
             states = votingRule.generateStatesForLevel(j, getParams());
             //System.out.println("Generated states for level " + j);
@@ -204,7 +209,7 @@ public class DPElection extends Election{
                 states = shrinkStatesBy1(states);
                 System.out.println("Generated states for level " + j);
             }*/
-            Object2ObjectOpenHashMap<ScoreVector, Set<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
+            Object2ObjectOpenHashMap<ScoreVector, List<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
             if (j == numVoters + 1) {
                 for (ScoreVector s : states) {
                     getWinnersBaseCase(g, s);
@@ -219,6 +224,7 @@ public class DPElection extends Election{
             }
             gMap = g;
             //gMap.putAll(g);
+            gMap.trim();
 
         }
 
@@ -239,7 +245,7 @@ public class DPElection extends Election{
         return res;
     }
 
-    private ArrayList<ElectionState> generateWinnerStates(Set<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
+    private ArrayList<ElectionState> generateWinnerStates(List<DPInfo> dpInfos, int numAlternatives, int numAltFactorial) throws Exception{
         Queue<Triple<ElectionState, DPInfo, ScoreVector>> q = new LinkedList<>();
         //Set<ElectionState> res = new ObjectOpenHashSet<>(dpInfos.size() * 2);
         ArrayList<ElectionState> res = new ArrayList<>();
@@ -249,7 +255,7 @@ public class DPElection extends Election{
             q.add(new Triple(initState, item, key));
 
         }
-        Map<ScoreVector, Set<DPInfo>> currMap = null;
+        Map<ScoreVector, List<DPInfo>> currMap = new Object2ObjectOpenHashMap<>();
         int prevSum = -1; //level counter, so we don't reload the same level map
         //Initial queue done, now start processing it
         while (!q.isEmpty()) {
@@ -279,7 +285,7 @@ public class DPElection extends Election{
                     currMap = getMapForStage(sum);
                     prevSum = sum;
                 }
-                Set<DPInfo> newInfos = currMap.get(key);
+                List<DPInfo> newInfos = currMap.get(key);
 
                 for (DPInfo item : newInfos) {
                     q.add(new Triple<>(newState, item, key));
@@ -296,7 +302,7 @@ public class DPElection extends Election{
         return res;
     }
 
-    private void writeToFileAndClear(Map<ScoreVector, Set<DPInfo>> g, int j) {
+    private void writeToFileAndClear(Map<ScoreVector, List<DPInfo>> g, int j) {
         //Writes g to file and deletes it from the array
         saveMapForStage(g, j);
         //g.clear();
@@ -369,8 +375,8 @@ public class DPElection extends Election{
         }
     }
 
-    private void getWinnersElseCase(Map<ScoreVector, Set<DPInfo>> g,
-                                    Map<ScoreVector, Set<DPInfo>> gLookup,
+    private void getWinnersElseCase(Map<ScoreVector, List<DPInfo>> g,
+                                    Map<ScoreVector, List<DPInfo>> gLookup,
                                     ArrayList<ScoreVector> EVector,
                                     int j, ScoreVector s) throws Exception {
         double bestPref = Double.MIN_VALUE;
@@ -388,7 +394,7 @@ public class DPElection extends Election{
             //ScoreVector gSum = s.addImmutable(e);
             ScoreVector gSum = getParams().getRule().compilationFunction(s, e, getParams());
 
-            Set<DPInfo> cStates = gLookup.get(gSum);
+            List<DPInfo> cStates = gLookup.get(gSum);
             ArrayList<Integer> cWinners = cStates.iterator().next().getWinners();
             //because we only need the rank of the current winners, getting only one is fine as
             //all winners will have same rank if they're all optimal
@@ -424,15 +430,15 @@ public class DPElection extends Election{
         }
         return sum;
     }
-    private void updateMappingWithOptima(Map<ScoreVector, Set<DPInfo>> g,
-                                         Map<ScoreVector, Set<DPInfo>> gLookup,
+    private void updateMappingWithOptima(Map<ScoreVector, List<DPInfo>> g,
+                                         Map<ScoreVector, List<DPInfo>> gLookup,
                                          ScoreVector s, ArrayList<ScoreVector> optimum_e) {
         Set<ScoreVector> seen = new ObjectOpenHashSet<>();
         for (ScoreVector e : optimum_e) {
             ScoreVector sPlusE = getParams().getRule().compilationFunction(s, e, getParams());
             if (!seen.contains(sPlusE)) {
                 seen.add(sPlusE);
-                Set<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
+                List<DPInfo> g_of_sPlusE = gLookup.get(sPlusE);
                 //prepare new DPInfo's
                 g_of_sPlusE = prepNewInfos(g_of_sPlusE, e);
                 //g.get(s).addAll(g_of_sPlusE);
@@ -449,20 +455,20 @@ public class DPElection extends Election{
         }
     }
 
-    private Set<DPInfo> prepNewInfos(Set<DPInfo> g_of_sPlusE, ScoreVector e) {
+    private List<DPInfo> prepNewInfos(List<DPInfo> g_of_sPlusE, ScoreVector e) {
         //Same winners, new e for profiling later on
         /*Set<DPInfo> res = g_of_sPlusE.stream()
                                 .map(dpInfo -> new DPInfo(dpInfo.getWinners(), e))
                                 .collect(Collectors.toCollection(ObjectOpenHashSet<DPInfo>::new));*/
-        Set<DPInfo> res = new ObjectOpenHashSet<>(g_of_sPlusE.size());
+        List<DPInfo> res = new LinkedList<>();
         for (DPInfo item : g_of_sPlusE) {
             res.add(new DPInfo(item.getWinners(), e));
         }
         return res;
     }
 
-    private void getWinnersBaseCase(Map<ScoreVector, Set<DPInfo>> g, ScoreVector s) {
-        Set<DPInfo> res = new ObjectOpenHashSet<>();
+    private void getWinnersBaseCase(Map<ScoreVector, List<DPInfo>> g, ScoreVector s) {
+        List<DPInfo> res = new LinkedList<>();
         ArrayList<Integer> winners = getParams().getRule().getWinnersOfEndState(s, getParams());
         res.add(new DPInfo(winners, null));
         g.put(s, res);

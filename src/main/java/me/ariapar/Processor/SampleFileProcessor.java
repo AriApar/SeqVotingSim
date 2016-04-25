@@ -44,10 +44,11 @@ public class SampleFileProcessor implements Runnable {
             in.close();
             ElectionType type = ElectionType.DP;
             if (args.length > 0) {
-                if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
-                else if (args[0].equals("-ac")) {
+                //if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
+                if (args[0].equals("-ac")) {
                     type = ElectionType.DPWITHCOSTLYABS;
                 }
+                else if (args[0].equals("-act")) type = ElectionType.GAMETREEWITHCOSTLYABS;
             }
 
             PreferenceList pref = new PreferenceList(prefList);
@@ -55,12 +56,12 @@ public class SampleFileProcessor implements Runnable {
             VotingRule rule = new PluralityVR(candidates);
 
             ElectionParameters params = new ElectionParameters(pref, order, rule, type);
-            DPElection e = (DPElection) ElectionFactory.create(params);
+            Election e = ElectionFactory.create(params);
 
             long startTime = System.nanoTime();
             ArrayList<ElectionState> winners = e.findNE();
             long endTime = System.nanoTime();
-            saveResultsToFile(order, winners, (endTime - startTime), p);
+            saveResultsToFile(order, winners, (endTime - startTime), p, type);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(p.toString());
@@ -68,9 +69,9 @@ public class SampleFileProcessor implements Runnable {
     }
 
     public static void saveResultsToFile(VotingOrder order, ArrayList<ElectionState> winners,
-                                         long time, Path path) {
+                                         long time, Path path, ElectionType type) {
         //make the directory if needed
-        String directoryPath = "results/";
+        String directoryPath = (type == ElectionType.GAMETREEWITHCOSTLYABS) ? "tree/results/" : "results";
         File f = new File(directoryPath);
         f.mkdirs();
         //get file path
@@ -125,7 +126,5 @@ public class SampleFileProcessor implements Runnable {
                 ex.printStackTrace();
             }
         }
-
-
     }
 }

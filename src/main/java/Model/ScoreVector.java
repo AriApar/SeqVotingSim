@@ -5,7 +5,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+
 import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 
 /**
  * Created by AriApar on 26/11/2015.
@@ -16,7 +19,7 @@ import it.unimi.dsi.fastutil.ints.*;
 public class ScoreVector implements Serializable {
 
     private int[] scores;
-    //private int hashCode;
+    private int hashCode;
     //private TIntIntHashMap scores;
     //private int numCandidates;
 
@@ -68,7 +71,7 @@ public class ScoreVector implements Serializable {
     }
 
     public int[] getRepresentation() {
-        return scores.clone();
+        return scores;
     }
 
     @Override
@@ -78,12 +81,18 @@ public class ScoreVector implements Serializable {
 
         ScoreVector that = (ScoreVector) o;
         //if (hashCode() != that.hashCode()) return false;
+        if (hashCode() != that.hashCode()) return false;
         return Arrays.equals(scores, that.scores);
 
     }
 
     @Override
-    public int hashCode() { return Arrays.hashCode(scores);}
+    public int hashCode() {
+        if (hashCode == 0) {
+            hashCode = Arrays.hashCode(scores);
+        }
+        return hashCode;
+    }
 
     public ScoreVector cloneAndSetCandidate(int candidate, int value) {
         assert candidate > 0 && candidate <= scores.length;
@@ -126,20 +135,29 @@ public class ScoreVector implements Serializable {
             if (arr[i] > 0) this.scores.put(i, (int) arr[i]);
         }
         this.numCandidates = numCandidates;
+        arr = null;
     }
 
     public ScoreVector addImmutable(ScoreVector voteVector) {
         if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on addImmutable");
         Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(voteVector.getRepresentation());
         //resMap.defaultReturnValue(0);
-        int[] keys = scores.keySet().toIntArray();
+        ObjectSet<Map.Entry<Integer, Integer>> entrySet = scores.entrySet();
+        for (Map.Entry<Integer, Integer> entry : entrySet) {
+            int key = entry.getKey();
+            int value = entry.getValue();
+            int newValue = resMap.addTo(key, value);
+            // if new value is 0 remove from map!
+            if(newValue == 0) resMap.remove(key);
+        }
+        *//*int[] keys = scores.keySet().toIntArray();
         for (int i = 0; i < scores.size() ; i++) {
             int key = keys[i];
             int value = scores.get(key);
             int newValue = resMap.addTo(key, value);
             // if new value is 0 remove from map!
-            if(newValue == 0) resMap.remove(i);
-        }
+            if(newValue == 0) resMap.remove(key);
+        }*//*
         return new ScoreVector(resMap, getLength());
     }
 
@@ -168,7 +186,7 @@ public class ScoreVector implements Serializable {
     }
 
     public Int2IntOpenHashMap getRepresentation() {
-        return new Int2IntOpenHashMap(scores);
+        return scores;
     }
 
     @Override
@@ -178,7 +196,8 @@ public class ScoreVector implements Serializable {
 
         ScoreVector that = (ScoreVector) o;
 
-        if (hashCode != that.hashCode()) return false;
+        if (hashCode() != that.hashCode()) return false;
+        if (scores.size() != that.scores.size()) return false;
         return  //Arrays.equals(scores.keys(), that.scores.keys()) && Arrays.equals(scores.values(), that.scores.values()) :
                 scores.equals(that.scores) ;//&& numCandidates == that.numCandidates :
 
@@ -187,8 +206,9 @@ public class ScoreVector implements Serializable {
     @Override
     public int hashCode() {
         if (hashCode == 0) {
+
             int result = 11;//17 * numCandidates;
-            result = scores != null ? result * 37 + scores.hashCode() : result;
+            result = scores != null ? result * 31 + scores.hashCode() : result;
             hashCode = result;
         }
         return hashCode;
@@ -215,5 +235,7 @@ public class ScoreVector implements Serializable {
         for(int i = 0; i< values.length; i++) sum += values[i];
         return sum;
     }
-*/
+    */
+
+
 }
