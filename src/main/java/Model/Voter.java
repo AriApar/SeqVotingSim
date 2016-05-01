@@ -22,16 +22,16 @@ public class Voter {
     }
 
     //Truthful vote
-    public ScoreVector vote() {
+    public Vector vote() {
 
         return getRule().voteTruthful(getPrefList().getPreferencesForVoter(voterId));
     }
 
-    public ScoreVector vote(int candidate) {
+    public Vector vote(int candidate) {
         return getRule().vote(candidate);
     }
 
-    public ScoreVector voteForPreference(int pref) {
+    public Vector voteForPreference(int pref) {
         return vote(getPreference(pref));
     }
 
@@ -117,8 +117,8 @@ public class Voter {
         //same rank child
         //keep the one which you like the most
         //if one of the options is strategically abstaining, it wins
-        int cCand = child.getData().getVoteCast();
-        int bCand = bestChild.getData().getVoteCast();
+        int cCand = child.getData().getLastVoteCast();
+        int bCand = bestChild.getData().getLastVoteCast();
         //if the best is abstaining, child cannot improve on that by lazy voter assumption
         //otherwise if current is abstaining, or current cand is better than best so far
         //swap current and best
@@ -137,7 +137,7 @@ public class Voter {
     //returns 0 if same, the new best util if better, <0 if worse
     private double calculateUtil(Node<ElectionState> candidate) throws Exception {
         //get the vote cast, we need to use it for costly voting
-        int voteCast = candidate.getData().getVoteCast();
+        int voteCast = candidate.getData().getLastVoteCast();
         //go to the end of its branch to see what the result is
         ArrayList<Integer> cWinners = getWinnersOfBranch(candidate);
 

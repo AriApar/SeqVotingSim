@@ -32,7 +32,7 @@ public class EqualityTester extends AbstractTester{
                 .listFiles(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String name) {
-                        return name.contains("2x10S") ;
+                        return name.contains("2x10S") || name.contains("3x10S");
                     }
                 });
 
@@ -65,7 +65,7 @@ public class EqualityTester extends AbstractTester{
             if (result) System.out.println(file.getName() + " matches.");
             else {
                 System.out.println(file.getName() + " DOES NOT MATCH");
-                printResults(order, treeWinners);
+                printResults(order, dpWinners);
                 break;
             }
         }

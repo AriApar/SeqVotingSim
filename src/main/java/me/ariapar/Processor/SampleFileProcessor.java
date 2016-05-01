@@ -62,6 +62,7 @@ public class SampleFileProcessor implements Runnable {
             ArrayList<ElectionState> winners = e.findNE();
             long endTime = System.nanoTime();
             saveResultsToFile(order, winners, (endTime - startTime), p, type);
+            e = null;
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(p.toString());

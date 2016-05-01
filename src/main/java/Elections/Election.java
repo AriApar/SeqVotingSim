@@ -1,6 +1,7 @@
 package Elections;
 
 import Model.ScoreVector;
+import Model.Vector;
 import Model.Voter;
 
 import java.util.ArrayList;
@@ -46,17 +47,17 @@ public abstract class Election {
     public ArrayList<ArrayList<Integer>> getNEs(ArrayList<ScoreVector> scoress) {
         ArrayList<ArrayList<Integer>> res = new ArrayList<>();
         for (ScoreVector score : scoress) {
-            res.add(getWinners(score));
+            res.add(getWinnersOfScoreVector(score));
         }
         return res;
     }
 
-    public ArrayList<Integer> getWinners(ScoreVector scores) {
-        return params.getRule().getWinners(scores);
+    public ArrayList<Integer> getWinnersOfScoreVector(ScoreVector scores) {
+        return params.getRule().getWinnersOfScoreVector(scores, params);
     }
 
     public int getUniqueWinner(ScoreVector scores) {
-        ArrayList<Integer> winners = getWinners(scores);
+        ArrayList<Integer> winners = getWinnersOfScoreVector(scores);
         if (winners.size() == 1) return winners.get(0);
         else {
             //tie-breaker via Random

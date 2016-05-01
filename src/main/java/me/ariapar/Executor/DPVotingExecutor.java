@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class DPVotingExecutor {
 
     public static void main(String[] args) {
-        ExecutorService threadPool = Executors.newFixedThreadPool(1);
+        ExecutorService threadPool = Executors.newFixedThreadPool(2);
         File resDirectory = new File(Paths.get("results").toString());
         resDirectory.mkdirs();
         File[] alreadyTestedFiles = resDirectory.listFiles();
@@ -42,13 +42,20 @@ public class DPVotingExecutor {
                 int index = Collections.binarySearch(fileNames, name);
                 int size = fileNames.size();
 
-                return name.contains("3x25S") && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
+                return (name.contains("4x"))
+
+                /*(name.contains("4x10S") || name.contains("5x15S") || name.contains("5x20S") || name.contains("5x25S") ||
+                        name.contains("6x10S") || name.contains("6x15S") || name.contains("6x20S") || name.contains("6x25S") ||
+                        name.contains("7x10S") || name.contains("7x15S") || name.contains("7x20S") || name.contains("7x25S") ||
+                        name.contains("8x10S") || name.contains("8x15S") || name.contains("8x20S") || name.contains("8x25S"))*/
+
+                        && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
             }
         });
 
         Arrays.sort( files, new Comparator<File>() {
             public int compare( File a, File b ) {
-                return Long.valueOf(a.lastModified()).compareTo(b.lastModified());
+                return a.getName().compareTo(b.getName());
             }
         });
 

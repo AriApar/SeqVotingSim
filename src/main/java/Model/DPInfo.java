@@ -8,11 +8,11 @@ import java.util.ArrayList;
  */
 public class DPInfo implements Serializable {
     private ArrayList<Integer> winners;
-    private ScoreVector prefE;
+    private Vector prefE;
 
     private int hashCode = 0;
 
-    public DPInfo(ArrayList<Integer> winners, ScoreVector prefVector) {
+    public DPInfo(ArrayList<Integer> winners, Vector prefVector) {
         this.winners = winners;
         this.prefE = prefVector;
         this.winners.trimToSize();
@@ -23,7 +23,7 @@ public class DPInfo implements Serializable {
         return winners;
     }
 
-    public ScoreVector getE() {
+    public Vector getE() {
         return prefE;
     }
 

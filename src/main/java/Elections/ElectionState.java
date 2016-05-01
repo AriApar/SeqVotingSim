@@ -1,6 +1,7 @@
 package Elections;
 
 import Model.ScoreVector;
+import Model.Vector;
 
 import java.util.ArrayList;
 
@@ -11,21 +12,18 @@ public class ElectionState {
     private ScoreVector currentScores;
     private ArrayList<Integer> currentWinners;
     private ArrayList<Integer> currentVotes;
-    private int voteCast; // vote cast by the last voter
 
     public ElectionState(int numCandidates) {
         currentScores = new ScoreVector(numCandidates);
         currentWinners = new ArrayList<>();
         currentVotes = new ArrayList<>();
-        voteCast = 0;
     }
 
     public ElectionState(ScoreVector currentScores, ArrayList<Integer> currentWinners,
-                         ArrayList<Integer> currentVotes, int voteCast) {
+                         ArrayList<Integer> currentVotes) {
         this.currentScores = currentScores;
         this.currentWinners = currentWinners;
         this.currentVotes = currentVotes;
-        this.voteCast = voteCast;
     }
 
     public ScoreVector getCurrentScores() {
@@ -38,8 +36,8 @@ public class ElectionState {
 
     public ArrayList<Integer> getCurrentVotes() { return currentVotes;}
 
-    public int getVoteCast() {
-        return voteCast;
+    public int getLastVoteCast() {
+        return currentVotes.get(currentVotes.size()-1);
     }
 
     @Override
@@ -49,7 +47,7 @@ public class ElectionState {
 
         ElectionState that = (ElectionState) o;
 
-        if (voteCast != that.voteCast) return false;
+        if (getLastVoteCast() != that.getLastVoteCast()) return false;
         if (currentScores != null ? !currentScores.equals(that.currentScores) : that.currentScores != null)
             return false;
         if (currentWinners != null ? !currentWinners.equals(that.currentWinners) : that.currentWinners != null)
@@ -63,7 +61,6 @@ public class ElectionState {
         int result = currentScores != null ? currentScores.hashCode() : 0;
         result = 31 * result + (currentWinners != null ? currentWinners.hashCode() : 0);
         result = 31 * result + (currentVotes != null ? currentVotes.hashCode() : 0);
-        result = 31 * result + voteCast;
         return result;
     }
 }

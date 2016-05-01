@@ -12,11 +12,11 @@ public class TruthfulElection extends Election {
     //private PreferenceList pref;
     //private ArrayList<Voter> voters;
     //private VotingRule rule;
-    //private ScoreVector scores;
+    //private Vector scores;
 
     protected TruthfulElection(ElectionParameters params) {
         setElection(params);
-        //scores = new ScoreVector(pref.getNumCandidates());
+        //scores = new Vector(pref.getNumCandidates());
     }
 
     public ScoreVector run() {
