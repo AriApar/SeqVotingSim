@@ -63,7 +63,7 @@ public class DPElection extends Election{
                     double bestPref = Double.MAX_VALUE;
                     ArrayList<Vector> optimum_e = new ArrayList<>();
                     for (Vector e : EVector) {
-                        Vector gSum = s.addImmutable(e);
+                        Vector gSum = s.add(e);
                         //System.out.println(gSum);
                         ArrayList<Integer> cWinners = g.get(gSum).iterator().next();
                         //because we only need the rank of the current winners, getting only one is fine as
@@ -80,7 +80,7 @@ public class DPElection extends Election{
                         }
                     }
                     for (Vector e : optimum_e) {
-                        Vector sPlusE = s.addImmutable(e);
+                        Vector sPlusE = s.add(e);
                         LinkedHashSet<ArrayList<Integer>> g_of_sPlusE = g.get(sPlusE);
                         if(g.containsKey(s)) {
                             //System.out.println(s.toString());
@@ -335,7 +335,7 @@ public class DPElection extends Election{
                     newState = prepNewState(state, candidate);
                 }
 
-                key = key.addImmutable(e);
+                key = key.add(e);
                 Set<DPInfo> newInfos = g.get(key);
 
                 for (DPInfo item : newInfos) {
@@ -383,12 +383,13 @@ public class DPElection extends Election{
             boolean abs = (abstention && e.get(e.getLength()-1) == 1);
 
             double cost = (!abs && hasCost) ? COST_OF_VOTING : 0D;
-            ArrayList<Integer> voteCast = getParams().getRule().getWinnersOfVoteVector(e, getParams());
+            //ArrayList<Integer> voteCast = getParams().getRule().getWinnersOfVoteVector(e, getParams());
+            Voter v = voters.get(j-1);
             //todo: change back depending on edith
-            double indUtil = (voteCast.size() == 0) ? 0D :
-                    voters.get(j-1).getCombinedUtilityForCandidates(voteCast) / 10000D;
+            //double indUtil = (voteCast.size() == 0) ? 0D :
+            //        v.getCombinedUtilityForCandidates(voteCast) / 10000D;
 
-            //Vector gSum = s.addImmutable(e);
+            //Vector gSum = s.add(e);
             Vector gSum = getParams().getRule().compilationFunction(s, e, getParams());
 
             List<DPInfo> cStates = gLookup.get(gSum);
@@ -396,24 +397,28 @@ public class DPElection extends Election{
             //because we only need the rank of the current winners, getting only one is fine as
             //all winners will have same rank if they're all optimal
 
-            double cPref = voters.get(j-1).getCombinedUtilityForCandidates(cWinners);
-            cPref = cPref - cost;
+            //double cPref = v.getCombinedUtilityForCandidates(cWinners);
+            //cPref = cPref - cost;
             //double totalVoteCost = (abstention) ? getNonAbstentionCount(s) * COST_OF_VOTING : 0D;
-            int comparison = Double.compare(cPref, bestPref);
+            //int comparison = Double.compare(cPref, bestPref);
+            int comparison = v.compareOverallUtilityForWinnersToCurrentBest(cWinners, cost, bestPref);
 
             if(comparison == 0) {
                 // add this to current set of optimum e, if individual preference is also same
-                int utilComparison = Double.compare(indUtil, bestUtil);
+                //int utilComparison = Double.compare(indUtil, bestUtil);
+                int utilComparison = v.compareIndUtilityForVoteToCurrentBest(e, bestUtil);
                 if (utilComparison == 0) optimum_e.add(e);
                 // if not, if new indUtil more, make this the new optimum
                 else if (utilComparison > 0) {
-                    optimum_e.clear(); optimum_e.add(e); bestUtil = indUtil;
+                    optimum_e.clear(); optimum_e.add(e); bestUtil = v.getIndUtilityForVote(e);
                 }
             }
             else if (comparison > 0) {
                 // new util more, trash old optimum, add this to new
                 //optimum_e = new ArrayList<>(); optimum_e.add(e); bestPref = cPref;
-                optimum_e.clear(); optimum_e.add(e); bestPref = cPref; bestUtil = indUtil;
+                optimum_e.clear(); optimum_e.add(e);
+                bestPref = v.getCombinedUtilityForCandidates(cWinners) - cost;
+                bestUtil = v.getIndUtilityForVote(e);
             }
         }
 
@@ -481,7 +486,7 @@ public class DPElection extends Election{
         for (Vector e : EVector) {
             boolean abs = (abstention && e.get(e.getLength()-1) == 1);
             double cost = ((abs && getParams().hasCost()) ? 0.01D : 0D);
-            Vector gSum = s.addImmutable(e);
+            Vector gSum = s.add(e);
 
             ArrayList<Integer> cWinners = g.get(gSum).iterator().next();
             //because we only need the rank of the current winners, getting only one is fine as
@@ -504,7 +509,7 @@ public class DPElection extends Election{
 
     /*private void updateMappingWithOptima(HashMap<Vector, LinkedHashSet<ArrayList<Integer>>> g, Vector s, ArrayList<Vector> optimum_e) {
         for (Vector e : optimum_e) {
-            Vector sPlusE = s.addImmutable(e);
+            Vector sPlusE = s.add(e);
             LinkedHashSet<ArrayList<Integer>> g_of_sPlusE = g.get(sPlusE);
             if(g.containsKey(s)) {
 

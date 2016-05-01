@@ -22,7 +22,7 @@ public class TruthfulElection extends Election {
     public ScoreVector run() {
         ScoreVector scores = new ScoreVector(getParams().getPref().getNumCandidates());
         for(Voter v : getVoters()) {
-            scores = scores.addImmutable(v.vote());
+            scores = scores.add(v.vote());
         }
         return scores;
     }

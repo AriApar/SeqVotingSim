@@ -43,7 +43,7 @@ public class BackInductionElection extends Election {
     }
 
     private ArrayList<ElectionState> getWinnerStates(Tree<ElectionState> root) {
-        ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size());
+        ArrayList<Node<ElectionState>> resList = root.getNodesAtLevel(voters.size()+1);
         ArrayList<ElectionState> winnerArray = new ArrayList<>();
         for (Node<ElectionState> winnerNode : resList)
             winnerArray.add(winnerNode.getData());
@@ -66,7 +66,7 @@ public class BackInductionElection extends Election {
                     int candidate = v.getPreference(i);
                     Vector s = v.voteForPreference(i);
                     // Prepare new score vector
-                    s = s.addImmutable(currState.getCurrentScores());
+                    s = s.add(currState.getCurrentScores());
                     //Prepare new votes
                     ArrayList<Integer> newVotes = prepareNewVotes(currState, candidate);
                     //Create new state
@@ -124,12 +124,12 @@ public class BackInductionElection extends Election {
     private void generateStateForEachCand(Voter v, Queue<Node<ElectionState>> nextLevel, Node<ElectionState> currNode) {
         ElectionState currState = currNode.getData();
         for (int i = 1; i <= getParams().numberOfCandidates(); i++) {
-            int candidate = v.getPreference(i);
-            Vector vote = v.voteForPreference(i);
+            //int candidate = v.getPreference(i);
+            Vector vote = v.vote(i);
             // Prepare new score vector
-            ScoreVector s = currState.getCurrentScores().addImmutable(vote);
+            ScoreVector s = currState.getCurrentScores().add(vote);
             //Prepare new votes
-            ArrayList<Integer> newVotes = prepareNewVotes(currState, candidate);
+            ArrayList<Integer> newVotes = prepareNewVotes(currState, i);
             //Create new state
             ElectionState newState = new ElectionState(s, getWinnersOfScoreVector(s), newVotes);
             //add as the child of currNode

@@ -14,10 +14,10 @@ public class Tree<T> {
     }
 
     public ArrayList<Node<T>> getNodesAtLevel(int level) {
-        //level 0 = root
+        //level 1 = root
         ArrayList<Node<T>> currLevel = new ArrayList<>();
         currLevel.add(root);
-        for (int i = 0; i <  level; i++) {
+        for (int i = 1; i <  level; i++) {
             ArrayList<Node<T>> nextLevel = new ArrayList<>();
             for (Node<T> currNode : currLevel) {
                 nextLevel.addAll(currNode.getChildren());

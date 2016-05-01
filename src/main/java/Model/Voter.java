@@ -14,7 +14,7 @@ public class Voter {
 
     private ElectionParameters params;
     private int voterId; //1..N
-    private final double COST_OF_VOTING = 0.01D;
+    private final double COST_OF_VOTING = 5D;
 
     public Voter(int voterId, ElectionParameters params) {
         this.voterId = voterId;
@@ -23,40 +23,11 @@ public class Voter {
 
     //Truthful vote
     public Vector vote() {
-
         return getRule().voteTruthful(getPrefList().getPreferencesForVoter(voterId));
     }
 
     public Vector vote(int candidate) {
         return getRule().vote(candidate);
-    }
-
-    public Vector voteForPreference(int pref) {
-        return vote(getPreference(pref));
-    }
-
-    public int getPreference(int preference) {
-        return getPrefList().getNthPreferenceOfVoter(preference, voterId);
-    }
-
-    public int getUtilityForCandidate(int candidate) throws Exception {
-        Preferences pref = getPrefList().getPreferencesForVoter(voterId);
-        //laziness assumption: if abstaining gives you the same utility as voting, abstain.
-        if (candidate == 0) throw new Exception("Trying to get utility for cand 0, most likely" +
-                "the costly voting is broken.");
-        int rank = pref.getPreferenceOfCandidate(candidate);
-        return (pref.length() - rank + 1) * 20;
-    }
-
-    public double getCombinedPreferenceForCandidates(ArrayList<Integer> candidates) throws Exception {
-        if (candidates.size() == 0) return Double.MAX_VALUE;
-        double res = 0D;
-        Preferences pref = getPrefList().getPreferencesForVoter(voterId);
-        for (Integer c : candidates) {
-            res += (double) pref.getPreferenceOfCandidate(c);
-        }
-        res = res / (double) candidates.size();
-        return res;
     }
 
     public double getCombinedUtilityForCandidates(ArrayList<Integer> candidates) throws Exception {
@@ -69,14 +40,42 @@ public class Voter {
         return res;
     }
 
-    public Tree<ElectionState> chooseWhoToVote(Tree<ElectionState> root, int nthToVote) throws Exception {
-        int level = nthToVote - 1;
+    public Tree<ElectionState> chooseWhoToVote(Tree<ElectionState> root, int level) throws Exception {
         ArrayList<Node<ElectionState>> currLevel = root.getNodesAtLevel(level);
         for (Node<ElectionState> currNode : currLevel) {
             ArrayList<Node<ElectionState>> toRemove = keepBestChild(currNode);
             currNode.removeChildren(toRemove);
         }
         return new Tree(root.getRoot());
+    }
+
+    public int compareOverallUtilityForWinnersToCurrentBest(ArrayList<Integer> winners,
+                                                         double cost, double bestUtil)  throws Exception
+    {
+        double cPref = getCombinedUtilityForCandidates(winners);
+        cPref = cPref - cost;
+        return Double.compare(cPref, bestUtil);
+    }
+
+    public int compareIndUtilityForVoteToCurrentBest(Vector vote, double bestUtil) throws Exception {
+        double indUtil = getIndUtilityForVote(vote);
+        return Double.compare(indUtil, bestUtil);
+    }
+
+    public double getIndUtilityForVote(Vector vote) throws Exception {
+        ArrayList<Integer> voteCast = params.getRule().getWinnersOfVoteVector(vote, params);
+        double indUtil = (voteCast.size() == 0) ? 0D :
+                getCombinedUtilityForCandidates(voteCast);
+        return indUtil;
+    }
+
+    private int getUtilityForCandidate(int candidate) throws Exception {
+        Preferences pref = getPrefList().getPreferencesForVoter(voterId);
+        //laziness assumption: if abstaining gives you the same utility as voting, abstain.
+        if (candidate == 0) throw new Exception("Trying to get utility for cand 0, most likely" +
+                "the costly voting is broken.");
+        int rank = pref.getPreferenceOfCandidate(candidate);
+        return (pref.length() - rank + 1) * 20;
     }
 
     private ArrayList<Node<ElectionState>> keepBestChild(Node<ElectionState> node) throws Exception {

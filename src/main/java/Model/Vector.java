@@ -34,7 +34,7 @@ public class Vector implements Serializable {
         }
     }*/
 
-    public Vector addImmutable(Vector voteVector) {
+    public Vector add(Vector voteVector) {
         assert (voteVector.getLength() == scores.length);
         int[] resArr = new int[scores.length];
         for (int i = 0; i < scores.length; i++) {
@@ -124,8 +124,8 @@ public class Vector implements Serializable {
         arr = null;
     }
 
-    public Vector addImmutable(Vector voteVector) {
-        if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on addImmutable");
+    public Vector add(Vector voteVector) {
+        if (voteVector.getLength() != getLength()) throw new AssertionError("vector sizes not equal on add");
         Int2IntOpenHashMap resMap = new Int2IntOpenHashMap(voteVector.getRepresentation());
         //resMap.defaultReturnValue(0);
         ObjectSet<Map.Entry<Integer, Integer>> entrySet = scores.entrySet();

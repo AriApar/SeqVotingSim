@@ -24,7 +24,7 @@ public class ScoreVector extends Vector{
     }
 
     @Override
-    public ScoreVector addImmutable(Vector voteVector) {
+    public ScoreVector add(Vector voteVector) {
         assert (voteVector.getLength() == getLength());
         int[] resArr = new int[getLength()];
         for (int i = 0; i < getLength(); i++) {
