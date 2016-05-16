@@ -16,13 +16,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by AriApar on 25/04/2016.
+ * Created by AriApar on 05/05/2016.
  */
-public class BackInductionVotingExecutor {
-
+public class TruthfulVotingExecutor {
     public static void main(String[] args) {
-        ExecutorService threadPool = Executors.newFixedThreadPool(1);
-        File resDirectory = new File(Paths.get("tree/results").toString());
+        ExecutorService threadPool = Executors.newFixedThreadPool(2);
+        File resDirectory = new File(Paths.get("truthful/results").toString());
         resDirectory.mkdirs();
         File[] alreadyTestedFiles = resDirectory.listFiles();
 
@@ -36,26 +35,18 @@ public class BackInductionVotingExecutor {
         Collections.sort(fileNames);
 
         File[] files = new File(Paths.get("res", "PListSamples").toString())
-                .listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        int index = Collections.binarySearch(fileNames, name);
-                        int size = fileNames.size();
-
-                        return name.contains("3x10S") || name.contains("2x10S"); //&& !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
-                    }
-                });
+                .listFiles();
 
         Arrays.sort( files, new Comparator<File>() {
             public int compare( File a, File b ) {
-                return Long.valueOf(a.lastModified()).compareTo(b.lastModified());
+                return a.getName().compareTo(b.getName());
             }
         });
 
         for (File file : files) {
             Path filePath = file.toPath();
             if (Files.isRegularFile(filePath))
-                threadPool.submit(new SampleFileProcessor(filePath, args));
+                threadPool.submit(new SampleFileProcessor(filePath, new String[]{"-t"}));
         }
         // shutdown the pool once you've submitted your last job
         long lStartTime = System.currentTimeMillis();

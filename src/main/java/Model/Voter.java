@@ -5,6 +5,8 @@ import Elections.ElectionState;
 import util.Node;
 import util.Tree;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 /**
@@ -14,7 +16,7 @@ public class Voter {
 
     private ElectionParameters params;
     private int voterId; //1..N
-    private final double COST_OF_VOTING = 5D;
+    public static final BigDecimal COST_OF_VOTING = BigDecimal.valueOf(0.0000000001D);
 
     public Voter(int voterId, ElectionParameters params) {
         this.voterId = voterId;
@@ -30,14 +32,15 @@ public class Voter {
         return getRule().vote(candidate);
     }
 
-    public double getCombinedUtilityForCandidates(ArrayList<Integer> candidates) throws Exception {
-        if (candidates.size() == 0) return Double.MIN_VALUE;
-        double res = 0D;
+    public BigDecimal getCombinedUtilityForCandidates(ArrayList<Integer> candidates) throws Exception {
+        if (candidates.size() == 0) return BigDecimal.valueOf(Double.MIN_VALUE);
+        int res = 0;
         for (Integer c : candidates) {
-            res += (double) getUtilityForCandidate(c);
+            res += getUtilityForCandidate(c);
         }
-        res = res / (double) candidates.size();
-        return res;
+        BigDecimal result = BigDecimal.valueOf(res);
+        result = result.divide(BigDecimal.valueOf(candidates.size()), 12, RoundingMode.HALF_UP);
+        return result;
     }
 
     public Tree<ElectionState> chooseWhoToVote(Tree<ElectionState> root, int level) throws Exception {
@@ -46,25 +49,25 @@ public class Voter {
             ArrayList<Node<ElectionState>> toRemove = keepBestChild(currNode);
             currNode.removeChildren(toRemove);
         }
-        return new Tree(root.getRoot());
+        return root;
     }
 
     public int compareOverallUtilityForWinnersToCurrentBest(ArrayList<Integer> winners,
-                                                         double cost, double bestUtil)  throws Exception
+                                                         BigDecimal cost, BigDecimal bestUtil)  throws Exception
     {
-        double cPref = getCombinedUtilityForCandidates(winners);
-        cPref = cPref - cost;
-        return Double.compare(cPref, bestUtil);
+        BigDecimal cPref = getCombinedUtilityForCandidates(winners);
+        cPref = cPref.subtract(cost);
+        return cPref.compareTo(bestUtil);
     }
 
-    public int compareIndUtilityForVoteToCurrentBest(Vector vote, double bestUtil) throws Exception {
-        double indUtil = getIndUtilityForVote(vote);
-        return Double.compare(indUtil, bestUtil);
+    public int compareIndUtilityForVoteToCurrentBest(Vector vote, BigDecimal bestUtil) throws Exception {
+        BigDecimal indUtil = getIndUtilityForVote(vote);
+        return indUtil.compareTo(bestUtil);
     }
 
-    public double getIndUtilityForVote(Vector vote) throws Exception {
+    public BigDecimal getIndUtilityForVote(Vector vote) throws Exception {
         ArrayList<Integer> voteCast = params.getRule().getWinnersOfVoteVector(vote, params);
-        double indUtil = (voteCast.size() == 0) ? 0D :
+        BigDecimal indUtil = (voteCast.size() == 0) ? BigDecimal.ZERO :
                 getCombinedUtilityForCandidates(voteCast);
         return indUtil;
     }
@@ -82,14 +85,14 @@ public class Voter {
         ArrayList<Node<ElectionState>> children = node.getChildren();
         ArrayList<Node<ElectionState>> toRemove = new ArrayList<>();
         //Node<ElectionState> bestLeaf = null;
-        double bestUtil = -1D; boolean first = true;
+        BigDecimal bestUtil = BigDecimal.valueOf(-1); boolean first = true;
         Node<ElectionState> bestChild = null;
 
         for (Node<ElectionState> child : children) {
             //check if this child is better than current best
             //if so, remove old best from children list, make this the best
             //otherwise, remove child from children list
-            double newUtil = calculateUtil(child);
+            BigDecimal newUtil = calculateUtil(child);
             // isBetter returns the new utility if positive
             if (first ||  compare(newUtil, bestUtil) > 0) {
                 //if we're first, set first to false
@@ -115,15 +118,14 @@ public class Voter {
     private Node<ElectionState> compareSameUtilChildren(ArrayList<Node<ElectionState>> toRemove, Node<ElectionState> bestChild, Node<ElectionState> child) throws Exception {
         //same rank child
         //keep the one which you like the most
-        //if one of the options is strategically abstaining, it wins
         int cCand = child.getData().getLastVoteCast();
         int bCand = bestChild.getData().getLastVoteCast();
         //if the best is abstaining, child cannot improve on that by lazy voter assumption
         //otherwise if current is abstaining, or current cand is better than best so far
         //swap current and best
         //else, child is worse again, so remove it.
-        if (bCand == 0) toRemove.add(child);
-        else if (cCand == 0 || getUtilityForCandidate(cCand) > getUtilityForCandidate(bCand)) {
+        if (cCand == 0) toRemove.add(child);
+        else if (bCand == 0 || getUtilityForCandidate(cCand) > getUtilityForCandidate(bCand)) {
             toRemove.add(bestChild); bestChild = child;
         }
         else {
@@ -134,22 +136,22 @@ public class Voter {
     }
 
     //returns 0 if same, the new best util if better, <0 if worse
-    private double calculateUtil(Node<ElectionState> candidate) throws Exception {
+    private BigDecimal calculateUtil(Node<ElectionState> candidate) throws Exception {
         //get the vote cast, we need to use it for costly voting
         int voteCast = candidate.getData().getLastVoteCast();
         //go to the end of its branch to see what the result is
         ArrayList<Integer> cWinners = getWinnersOfBranch(candidate);
 
         // we calculate the avg utility we get from the winners.
-        Double cSum = getCombinedUtilityForCandidates(cWinners);
+        BigDecimal cSum = getCombinedUtilityForCandidates(cWinners);
         //cost of voting
-        if (params.hasCost() && voteCast != 0) cSum -= COST_OF_VOTING;
+        if (params.hasCost() && voteCast != 0) cSum = cSum.subtract(COST_OF_VOTING);
 
         return cSum;
     }
 
-    private int compare(double newUtil, double currUtil) {
-        return Double.compare(newUtil, currUtil);
+    private int compare(BigDecimal newUtil, BigDecimal currUtil) {
+        return newUtil.compareTo(currUtil);
     }
 
     private ArrayList<Integer> getWinnersOfBranch(Node<ElectionState> candidate) {

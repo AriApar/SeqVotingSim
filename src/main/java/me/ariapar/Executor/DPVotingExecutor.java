@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class DPVotingExecutor {
 
     public static void main(String[] args) {
-        ExecutorService threadPool = Executors.newFixedThreadPool(2);
-        File resDirectory = new File(Paths.get("results").toString());
+        ExecutorService threadPool = Executors.newFixedThreadPool(8);
+        File resDirectory = new File(Paths.get("lazy_wo_cost/results").toString());
         resDirectory.mkdirs();
         File[] alreadyTestedFiles = resDirectory.listFiles();
 
@@ -42,12 +42,16 @@ public class DPVotingExecutor {
                 int index = Collections.binarySearch(fileNames, name);
                 int size = fileNames.size();
 
-                return (name.contains("4x"))
+                return (name.contains("2x") ||
+                        name.contains("3x") ||
 
-                /*(name.contains("4x10S") || name.contains("5x15S") || name.contains("5x20S") || name.contains("5x25S") ||
+                        name.contains("4x10S") || name.contains("4x15S") || name.contains("4x20S") || name.contains("4x25S") ||
+                        name.contains("4x50S") || name.contains("4x75S") || name.contains("4x100S") || //name.contains("4x120S") ||
+
+                        name.contains("5x10S") || name.contains("5x15S") || name.contains("5x20S") || name.contains("5x25S") ||
                         name.contains("6x10S") || name.contains("6x15S") || name.contains("6x20S") || name.contains("6x25S") ||
-                        name.contains("7x10S") || name.contains("7x15S") || name.contains("7x20S") || name.contains("7x25S") ||
-                        name.contains("8x10S") || name.contains("8x15S") || name.contains("8x20S") || name.contains("8x25S"))*/
+                            name.contains("7x10S") || name.contains("7x15S") || name.contains("7x20S") || name.contains("7x25S") ||
+                                name.contains("8x10S") || name.contains("8x15S") || name.contains("8x20S"))// || name.contains("8x25S"))
 
                         && !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
             }
@@ -61,8 +65,10 @@ public class DPVotingExecutor {
 
         for (File file : files) {
             Path filePath = file.toPath();
-            if (Files.isRegularFile(filePath))
-                threadPool.submit(new SampleFileProcessor(filePath, args));
+            if (Files.isRegularFile(filePath)) {
+                threadPool.submit(new SampleFileProcessor(filePath, new String[]{"-a"}));
+                //threadPool.submit(new SampleFileProcessor(filePath, new String[]{"-ac"}));
+            }
         }
         // shutdown the pool once you've submitted your last job
         long lStartTime = System.currentTimeMillis();

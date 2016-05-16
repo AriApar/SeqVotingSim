@@ -6,12 +6,13 @@ import VotingRules.PluralityVR;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * Created by AriApar on 25/11/2015.
  */
-public class TruthfulVotingTester {
+public class TruthfulVotingTester extends AbstractTester{
 
 
     public static void main(String[] args) throws Exception{
@@ -33,14 +34,9 @@ public class TruthfulVotingTester {
             ElectionParameters params = new ElectionParameters(pref, order, rule, ElectionType.TRUTHFUL);
             TruthfulElection e = (TruthfulElection) ElectionFactory.create(params);
 
-            ScoreVector scores = e.run();
-            int winner = e.getUniqueWinner(scores);
-            System.out.println("The winner is candidate " + winner +
-                                " with " + scores.getCandidate(winner) + " votes!");
-            System.out.println("Distribution of Votes:");
-            for (int i = 1; i <= pref.getNumCandidates(); i++) {
-                System.out.println("Candidate " + i + ": " + scores.getCandidate(i) + " votes.");
-            }
+            ArrayList<ElectionState> winners = e.findNE();
+
+            printResults(order, winners);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -49,11 +45,4 @@ public class TruthfulVotingTester {
 
     }
 
-    private static File getFile(String fileName) {
-
-        //Get file from resources folder
-
-        File file = new File("res/PlistExamples/" + fileName);
-        return file;
-    }
 }

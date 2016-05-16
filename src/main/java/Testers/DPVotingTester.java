@@ -20,7 +20,7 @@ public class DPVotingTester extends AbstractTester {
         //System.in.read();
         try {
 
-            Scanner in = new Scanner(getFile("10x10Sample"));
+            Scanner in = new Scanner(getFile("9x4Sample"));
             int voters = in.nextInt();
             int candidates = in.nextInt();
             int[][] prefList = new int[voters][candidates];

@@ -44,11 +44,12 @@ public class SampleFileProcessor implements Runnable {
             in.close();
             ElectionType type = ElectionType.DP;
             if (args.length > 0) {
-                //if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
-                if (args[0].equals("-ac")) {
+                if (args[0].equals("-a")) type = ElectionType.DPWITHABS;
+                else if (args[0].equals("-ac")) {
                     type = ElectionType.DPWITHCOSTLYABS;
                 }
                 else if (args[0].equals("-act")) type = ElectionType.GAMETREEWITHCOSTLYABS;
+                else if (args[0].equals("-t")) type = ElectionType.TRUTHFUL;
             }
 
             PreferenceList pref = new PreferenceList(prefList);
@@ -69,63 +70,78 @@ public class SampleFileProcessor implements Runnable {
         }
     }
 
-    public static void saveResultsToFile(VotingOrder order, ArrayList<ElectionState> winners,
-                                         long time, Path path, ElectionType type) {
+    public void saveResultsToFile(VotingOrder order, ArrayList<ElectionState> winners,
+                                         long time, Path path, ElectionType type){
         //make the directory if needed
-        String directoryPath = (type == ElectionType.GAMETREEWITHCOSTLYABS) ? "tree/results/" : "results";
-        File f = new File(directoryPath);
-        f.mkdirs();
-        //get file path
-        Path p = Paths.get(directoryPath, path.getFileName().toString());
-        BufferedWriter writer = null;
+        String directoryPath;
         try {
-            writer = Files.newBufferedWriter(p, StandardCharsets.UTF_8);
-            writer.write("This election has " + winners.size() +
-                    " Nash equilibria!");
-            writer.newLine();
-            Iterator<ElectionState> it = winners.iterator();
-            for (int i = 1; i<= winners.size(); i++) {
-                writer.write("Nash Equilibrium " + i + ":");
-                writer.newLine();
-                writer.write("The winner is candidate(s) ");
-                ElectionState wins = it.next();
-                //Print winners
-                ArrayList<Integer> elected = wins.getCurrentWinners();
-                //System.out.println(elected.toString());
-
-                for (int j = 0; j < elected.size() - 1; j++) writer.write(elected.get(j) + ", ");
-                writer.write(elected.get(elected.size() -1).toString());
-                writer.newLine();
-                //Print vote distribution
-                writer.write("Vote Distribution: " + wins.getCurrentScores().toString());
-                writer.newLine();
-                ArrayList<Integer> votes = wins.getCurrentVotes();
-                writer.write("Abstentions: " +  (votes.size() - wins.getCurrentScores().getSum()));
-                writer.newLine();
-                //Print votes cast by each voter
-                writer.write("Votes Cast (in order): ");
-                writer.newLine();
-                Iterator<Integer> iter = wins.getCurrentVotes().iterator();
-                for (Integer v : order) {
-                    writer.write("Voter " + v + ": Candidate " +  iter.next());
-                    writer.newLine();
-                }
-
+            switch (type){
+                case GAMETREEWITHCOSTLYABS: directoryPath = "tree/results/";
+                    break;
+                case TRUTHFUL: directoryPath = "truthful/results/";
+                    break;
+                case DPWITHCOSTLYABS: directoryPath = "results";
+                    break;
+                case DPWITHABS: directoryPath = "lazy_wo_cost/results";
+                    break;
+                default: throw new Exception("invalid election type for saving results");
             }
-            writer.write("Time taken: " + time + " nanoseconds");
-
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
+            File f = new File(directoryPath);
+            f.mkdirs();
+            //get file path
+            Path p = Paths.get(directoryPath, path.getFileName().toString());
+            BufferedWriter writer = null;
             try {
-                writer.close();
-                System.out.println("File " + path.getFileName().toString() + " done.");
-            } catch (IOException ex) {
-                // Log error writing file and bail out.
-                ex.printStackTrace();
+                writer = Files.newBufferedWriter(p, StandardCharsets.UTF_8);
+                writer.write("This election has " + winners.size() +
+                        " Nash equilibria!");
+                writer.newLine();
+                Iterator<ElectionState> it = winners.iterator();
+                for (int i = 1; i<= winners.size(); i++) {
+                    writer.write("Nash Equilibrium " + i + ":");
+                    writer.newLine();
+                    writer.write("The winner is candidate(s) ");
+                    ElectionState wins = it.next();
+                    //Print winners
+                    ArrayList<Integer> elected = wins.getCurrentWinners();
+                    //System.out.println(elected.toString());
+
+                    for (int j = 0; j < elected.size() - 1; j++) writer.write(elected.get(j) + ", ");
+                    writer.write(elected.get(elected.size() -1).toString());
+                    writer.newLine();
+                    //Print vote distribution
+                    writer.write("Vote Distribution: " + wins.getCurrentScores().toString());
+                    writer.newLine();
+                    ArrayList<Integer> votes = wins.getCurrentVotes();
+                    writer.write("Abstentions: " +  (votes.size() - wins.getCurrentScores().getSum()));
+                    writer.newLine();
+                    //Print votes cast by each voter
+                    writer.write("Votes Cast (in order): ");
+                    writer.newLine();
+                    Iterator<Integer> iter = wins.getCurrentVotes().iterator();
+                    for (Integer v : order) {
+                        writer.write("Voter " + v + ": Candidate " +  iter.next());
+                        writer.newLine();
+                    }
+
+                }
+                writer.write("Time taken: " + time + " nanoseconds");
+
             }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                try {
+                    writer.close();
+                    System.out.println("File " + path.getFileName().toString() + " done, " + args[0]);
+                } catch (IOException ex) {
+                    // Log error writing file and bail out.
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

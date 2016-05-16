@@ -32,9 +32,14 @@ public class EqualityTester extends AbstractTester{
                 .listFiles(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String name) {
-                        return name.contains("2x10S") || name.contains("3x10S");
+                        //return name.contains("2x10S") || name.contains("3x10S");
+                        //return name.contains("4x10S") || name.contains("5x10S");
+                        //return name.contains("4x10Sample120");
+                        return name.equals("3x10Sample2");
                     }
                 });
+
+        Arrays.sort(files);
 
         for (File file : files) {
             Scanner in = new Scanner(file);
@@ -62,10 +67,14 @@ public class EqualityTester extends AbstractTester{
             ArrayList<ElectionState> dpWinners = dpE.findNE();
             ArrayList<ElectionState> treeWinners = treeE.findNE();
             boolean result = compareResults(dpWinners, treeWinners);
-            if (result) System.out.println(file.getName() + " matches.");
+            if (result) {
+                System.out.println(file.getName() + " matches.");
+                printResults(order, dpWinners);
+            }
             else {
                 System.out.println(file.getName() + " DOES NOT MATCH");
                 printResults(order, dpWinners);
+                printResults(order, treeWinners);
                 break;
             }
         }

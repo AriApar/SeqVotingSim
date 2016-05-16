@@ -3,6 +3,8 @@ package Elections;
 import Model.*;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.*;
 
 import Model.Vector;
@@ -16,9 +18,9 @@ import it.unimi.dsi.fastutil.objects.*;
 public class DPElection extends Election{
     //Dynamic programming election that follows Algorithm 1 from Stackelberg paper.
     private boolean abstention;
-    private boolean cost;
+    //private boolean cost;
     private ArrayList<Voter> voters;
-    private final double COST_OF_VOTING = 5D;
+    //private final double COST_OF_VOTING = 5D;
     //private Map<Vector, List<DPInfo>>[] mapArr;
 
     private class Triple<X, Y, Z> {
@@ -35,7 +37,7 @@ public class DPElection extends Election{
     protected DPElection(ElectionParameters params) {
         setElection(params);
         abstention = params.canAbstain();
-        cost = params.hasCost();
+        //cost = params.hasCost();
         voters = getVoters();
         //mapArr = (Map<Vector, List<DPInfo>>[]) Array.newInstance(Object2ObjectOpenHashMap.class, voters.size() +1);// Object2ObjectOpenHashMap<Vector, Set<DPInfo>>[voters.size() +1];
     }
@@ -183,34 +185,23 @@ public class DPElection extends Election{
         int numAlternatives = getParams().numberOfCandidates();
         //stars and bars calculation
         int numBoxes = abstention ? numAlternatives + 1 : numAlternatives;
-
         //add abstention possibility
 
+        Object2ObjectOpenHashMap<Vector, List<DPInfo>> gMap =
+                new Object2ObjectOpenHashMap<>(IntMath.binomial(numVoters + numBoxes - 2, numBoxes -1));
 
-        //Map<Vector, Set<DPInfo>> g = new THashMap<>();
-        Object2ObjectOpenHashMap<Vector, List<DPInfo>> gMap = new Object2ObjectOpenHashMap<>(IntMath.binomial(numVoters + numBoxes - 2, numBoxes -1));
-        //gMap.setAutoCompactionFactor(0.5f);
-
-
-        final ArrayList<Vector> EVector =  votingRule.generateEVectors(getParams()); //generateEVectors(numAltFactorial);
-        List<Vector> states = null;
+        final ArrayList<Vector> EVector =  votingRule.generateEVectors(getParams());
+        List<Vector> states;
         for (int j = numVoters +1; j >=1; j--) {
             states = votingRule.generateStatesForLevel(j, getParams());
-            //System.out.println("Generated states for level " + j);
-            /*if (j == numVoters+1)
-                states = getParams().getRule().generateStatesForLevel(j, getParams());
-            else {
-                //states = getParams().getRule().generateStatesForLevel(j, getParams());
-                states = shrinkStatesBy1(states);
-                System.out.println("Generated states for level " + j);
-            }*/
+
             Object2ObjectOpenHashMap<Vector, List<DPInfo>> g = new Object2ObjectOpenHashMap<>(IntMath.binomial(j + numBoxes - 2, numBoxes -1));
             if (j == numVoters + 1) {
                 for (Vector s : states) {
                     getWinnersBaseCase(g, s);
                 }
             }
-            //g.setAutoCompactionFactor(0.5f);
+
             else {
                 for (Vector s : states) {
                     getWinnersElseCase(g, gMap, EVector, j, s);
@@ -223,8 +214,6 @@ public class DPElection extends Election{
 
         }
 
-        //return generateWinnerStates(g, g.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
-        //return generateWinnerStates(gMap.get(generateZeroVector(numAltFactorial)), numAlternatives, numAltFactorial);
         int stateSize = votingRule.getCompilationStateSize(getParams());
         return generateWinnerStates(gMap.get(generateZeroVector(stateSize)), numAlternatives, stateSize);
     }
@@ -374,15 +363,15 @@ public class DPElection extends Election{
                                     Map<Vector, List<DPInfo>> gLookup,
                                     ArrayList<Vector> EVector,
                                     int j, Vector s) throws Exception {
-        double bestPref = Double.MIN_VALUE;
-        double bestUtil = Double.MIN_VALUE;
+        BigDecimal bestPref = BigDecimal.valueOf(Double.MIN_VALUE);
+        BigDecimal bestUtil = BigDecimal.valueOf(Double.MIN_VALUE);
         ArrayList<Vector> optimum_e = new ArrayList<>();
         boolean hasCost = getParams().hasCost();
 
         for (Vector e : EVector) {
             boolean abs = (abstention && e.get(e.getLength()-1) == 1);
 
-            double cost = (!abs && hasCost) ? COST_OF_VOTING : 0D;
+            BigDecimal cost = (!abs && hasCost) ? Voter.COST_OF_VOTING : BigDecimal.ZERO;
             //ArrayList<Integer> voteCast = getParams().getRule().getWinnersOfVoteVector(e, getParams());
             Voter v = voters.get(j-1);
             //todo: change back depending on edith
@@ -417,7 +406,7 @@ public class DPElection extends Election{
                 // new util more, trash old optimum, add this to new
                 //optimum_e = new ArrayList<>(); optimum_e.add(e); bestPref = cPref;
                 optimum_e.clear(); optimum_e.add(e);
-                bestPref = v.getCombinedUtilityForCandidates(cWinners) - cost;
+                bestPref = v.getCombinedUtilityForCandidates(cWinners).subtract(cost);
                 bestUtil = v.getIndUtilityForVote(e);
             }
         }

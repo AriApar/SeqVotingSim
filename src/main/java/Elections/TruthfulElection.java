@@ -28,7 +28,16 @@ public class TruthfulElection extends Election {
     }
 
     @Override
-    public ArrayList<ElectionState> findNE() throws Exception {
-        throw new UnsupportedOperationException("TruthfulElection is executed via run() method");
+    public ArrayList<ElectionState> findNE()  {
+        ScoreVector scores = new ScoreVector(getParams().getPref().getNumCandidates());
+        ArrayList<Integer> votes = new ArrayList<>();
+        for(Voter v : getVoters()) {
+            Vector voteVector = v.vote();
+            scores = scores.add(voteVector);
+            votes.add(getParams().getRule().getWinnersOfVoteVector(voteVector, getParams()).get(0));
+        }
+        ArrayList<ElectionState> res = new ArrayList<>();
+        res.add(new ElectionState(scores, getWinnersOfScoreVector(scores), votes));
+        return res;
     }
 }

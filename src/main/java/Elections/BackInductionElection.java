@@ -17,14 +17,14 @@ public class BackInductionElection extends Election {
     //private VotingRule rule;
     //private Vector scores;
     private boolean abstention;
-    private boolean cost;
+    //private boolean cost;
     private ArrayList<Voter> voters;
 
     protected BackInductionElection(ElectionParameters params) {
         setElection(params);
         voters = getVoters();
         abstention = params.canAbstain();
-        cost = params.hasCost();
+        //cost = params.hasCost();
     }
 
     public ArrayList<ElectionState> findNE() throws Exception {
