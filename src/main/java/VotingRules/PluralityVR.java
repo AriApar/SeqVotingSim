@@ -17,34 +17,28 @@ import com.google.common.collect.ImmutableList;
  */
 public class PluralityVR implements VotingRule {
 
-    //private Vector scores;
     private ArrayList<Integer> scoringVector;
 
     public PluralityVR(int candidates) {
-        //scores = new Vector(candidates);
         scoringVector = new ArrayList<>(candidates);
         for (int i = 0; i < candidates; i++) scoringVector.add(0);
         scoringVector.set(0,1);
     }
 
     @Override
-    public Vector voteTruthful(Preferences pref) {
-        /*Vector res = new Vector(pref.length());
-        int candidateNo = pref.getNthPreference(1);
-        res = res.cloneAndSetCandidate(candidateNo, 1);
-        return res;*/
+    public IVector voteTruthful(Preferences pref) {
         return vote(pref.getNthPreference(1));
     }
 
     @Override
-    public Vector vote(int candidate) {
-        Vector res = new Model.Vector(scoringVector.size());
+    public IVector vote(int candidate) {
+        IVector res = new Model.Vector(scoringVector.size());
         res = res.cloneAndSet(candidate-1, 1);
         return res;
     }
 
     @Override
-    public ArrayList<Integer> getWinnersOfVoteVector(Vector s, ElectionParameters params) {
+    public ArrayList<Integer> getWinnersOfVoteVector(IVector s, ElectionParameters params) {
         //Gets the winners if each preference got s(i) no of votes
         //preferences in s ordered lexicographically
         //if abstention is possible, there is an abstention vector at the end of scorevectors
@@ -58,8 +52,7 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public ArrayList<Integer> getWinnersOfStateVector(Vector s, ElectionParameters params) {
-
+    public ArrayList<Integer> getWinnersOfStateVector(IVector s, ElectionParameters params) {
         int length = !params.canAbstain() ? s.getLength() : s.getLength() -1;
         ArrayList<Integer> res = new ArrayList<>();
         int maxVotes = 0;
@@ -77,13 +70,13 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public Vector compilationFunction(Vector state, Vector vote, ElectionParameters params) {
+    public IVector compilationFunction(IVector state, IVector vote, ElectionParameters params) {
         //preferences in vote ordered lexicographically
         //if abstention is possible, there is an abstention element at the end of scorevectors
         int altCount = params.numberOfCandidates();
         boolean abstain = params.canAbstain();
         int absCounter = abstain ? 1 : 0;
-        Vector res = null;
+        IVector res = null;
         int block = (vote.getLength() - absCounter) / altCount;
         boolean done = false;
         //done should be true when we've seen the one, as plurality allows for only one vote (ie entry with value 1)
@@ -91,7 +84,6 @@ public class PluralityVR implements VotingRule {
         //as described by the evector function.
         for (int cNo = 0; cNo < altCount && !done; cNo++) {
             int vectorIndex = cNo*block;
-
             if (vote.get(vectorIndex) == 1) {
                 int oldValue = state.get(cNo);
                 res = state.cloneAndSet(cNo, oldValue + 1);
@@ -104,15 +96,11 @@ public class PluralityVR implements VotingRule {
             int oldValue = state.get(absIndex);
             res = state.cloneAndSet(absIndex, oldValue + 1 );
         }
-
         return res;
     }
 
     @Override
-    public List<Vector> generateStatesForLevel(int level, ElectionParameters params) {
-
-        //return generatePossibleScoresAtLevel(level, getCompilationStateSize(params));
-        //System.out.println("Generating states for level " + level + " started");
+    public List<IVector> generateStatesForLevel(int level, ElectionParameters params) {
         return generateUniqueScoresAtLevel(level, getCompilationStateSize(params));
     }
 
@@ -125,7 +113,7 @@ public class PluralityVR implements VotingRule {
     }
 
     @Override
-    public ArrayList<Vector> generateEVectors(ElectionParameters params) {
+    public ArrayList<IVector> generateEVectors(ElectionParameters params) {
         int altCount = params.numberOfCandidates();
         boolean abstain = params.canAbstain();
         int absCounter = abstain ? 1 : 0;
@@ -133,49 +121,28 @@ public class PluralityVR implements VotingRule {
         int eSize = factorial(altCount) + absCounter;
         int block = (eSize - absCounter) / altCount;
 
-        ArrayList<Vector> res = new ArrayList<>();
-        Vector zeroVector = new Vector(eSize);
+        ArrayList<IVector> res = new ArrayList<>();
+        IVector zeroIVector = new Vector(eSize);
 
         for (int j = 0; j < eSize; j++) {
             //Only set e to 1 once for each voter (once per altCount elements)
             if (j % block == 0) {
-                // if abstention is false, then this will return true once per each
-                // candidate
+                // if abstention is false, then this will return true once per each candidate
                 // if true, then it will return true once per each cand.
                 // and also once at the end, representing abstention
-                Vector e = zeroVector.cloneAndSet(j, 1);
+                IVector e = zeroIVector.cloneAndSet(j, 1);
                 res.add(e);
             }
         }
-        //System.out.println("EVector size: " + res.size());
         return res;
-
     }
 
-/*    private Set<Vector> generatePossibleScoresAtLevel(int level, int size) {
-        assert (level >= 1);
-        Set<Vector> scores = new ObjectOpenHashSet<Vector>(IntMath.binomial(level + size -2, size -1));
-        scores.add(new Vector(size));
-        for (int i = 2; i <=level; i++) {
-            Set<Vector> nextScores = new ObjectOpenHashSet<>();
-            for (Vector s : scores) {
-                for (int j = 0; j < size; j++) {
-                    nextScores.add(s.cloneAndSet(j, s.get(j) + 1));
-                }
-            }
-            scores = nextScores;
-            //System.out.println("Generated scores for level " + i + ", size: " + scores.size());
-        }
-        return scores;
-    }*/
-
-    private ArrayList<Integer> calcWinnersOfPrefVectors(Vector s, int numAlternatives, int absCounter) {
+    private ArrayList<Integer> calcWinnersOfPrefVectors(IVector s, int numAlternatives, int absCounter) {
         //only vectors passed in are vote vectors
         //so we know where to find the votes
         ArrayList<Integer> res = new ArrayList<>();
         int block = (s.getLength() - absCounter)/ numAlternatives;
         int maxVotes = 0;
-        int index = 0;
         for (int i = 1; i <= numAlternatives; i++) {
             int cVotes = s.get(block*(i-1));
             if (cVotes > maxVotes) {
@@ -209,34 +176,23 @@ public class PluralityVR implements VotingRule {
         return fact;
     }
 
-    private List<Vector> generateUniqueScoresAtLevel(int level, int size) {
+    private List<IVector> generateUniqueScoresAtLevel(int level, int size) {
         //DO NOT PUT ZEROES AS A MAPPING TO SCORE VECTORS
         assert (level >= 1);
-        List<Vector> scores = new LinkedList<Vector>();
+        List<IVector> scores = new LinkedList<IVector>();
         //We will use Guava's ordered permutation methods for this
         //To do that we represent the problem as permutations of a string of level-1 1's and size-1 zeroes
         //and then splitting the arrays on zeroes
         //setting each candidate's vote count to the number of ones in its split.
 
         ImmutableList.Builder<Integer> builder = new ImmutableList.Builder<Integer>();
-        //Integer[] input = new Integer[level+size-2];
         for (int i = 0; i < level -1; i++) builder.add(1);
         for (int i = level -1; i < level + size -2; i++) builder.add(0);
-        //Arrays.fill(input, 0, level-1, 1);
-        //Arrays.fill(input, level-1, level+size-2, 0);
         Collection<List<Integer>> perms = Collections2.orderedPermutations(builder.build());
-                //ImmutableList.copyOf(input));
-        //System.out.println("Perms done, size: " + perms.size());
         for (List<Integer> perm : perms) {
-            //String s = buildString(perm);
-            //now we split the string on the zeroes
-            //String[] splitPerm = s.split("0", size);
-            //assert splitPerm.length == size;
-            //Integer[] arrPerm = perm.toArray(new Integer[perm.size()]);
             int[] scoreCounts = new int[size];
             int index = 0; int count = 0; boolean done = false;
             for (int i=0; i< perm.size() && !done; i++) {
-
                 if (perm.get(i) == 1) count += 1;
                 else {
                     scoreCounts[index] = count;
@@ -248,26 +204,9 @@ public class PluralityVR implements VotingRule {
                         done = true;
                     }
                 }
-
             }
-
             scores.add(new Vector(scoreCounts));
-            //input = null;
         }
-        //System.out.println("Generated scores for total " + level + ", size: " + scores.size());
-        perms = null;
         return scores;
-
     }
-
-    private String buildString(List<Integer> list) {
-        Integer[] arr = list.toArray(new Integer[1]);
-        StringBuilder sb = new StringBuilder(arr.length);
-        for (int i : arr) {
-            sb.append(i);
-        }
-        String s = sb.toString();
-        return s;
-    }
-
 }

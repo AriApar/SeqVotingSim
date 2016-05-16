@@ -46,7 +46,6 @@ public class SampleFileWriter {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private String getNextPermutationString() {
@@ -55,7 +54,6 @@ public class SampleFileWriter {
                 .map(number -> String.valueOf(number))
                 .collect(Collectors.joining(" "));
     }
-
 
     private String getFileName(int suffix) {
         return numCandidates + "x" + numVoters + "Sample" + suffix;

@@ -1,7 +1,6 @@
 package Elections;
 
 import Model.*;
-
 import java.util.ArrayList;
 
 /**
@@ -9,22 +8,8 @@ import java.util.ArrayList;
  */
 public class TruthfulElection extends Election {
 
-    //private PreferenceList pref;
-    //private ArrayList<Voter> voters;
-    //private VotingRule rule;
-    //private Vector scores;
-
     protected TruthfulElection(ElectionParameters params) {
         setElection(params);
-        //scores = new Vector(pref.getNumCandidates());
-    }
-
-    public ScoreVector run() {
-        ScoreVector scores = new ScoreVector(getParams().getPref().getNumCandidates());
-        for(Voter v : getVoters()) {
-            scores = scores.add(v.vote());
-        }
-        return scores;
     }
 
     @Override
@@ -32,9 +17,9 @@ public class TruthfulElection extends Election {
         ScoreVector scores = new ScoreVector(getParams().getPref().getNumCandidates());
         ArrayList<Integer> votes = new ArrayList<>();
         for(Voter v : getVoters()) {
-            Vector voteVector = v.vote();
-            scores = scores.add(voteVector);
-            votes.add(getParams().getRule().getWinnersOfVoteVector(voteVector, getParams()).get(0));
+            IVector voteIVector = v.vote();
+            scores = scores.add(voteIVector);
+            votes.add(getParams().getRule().getWinnersOfVoteVector(voteIVector, getParams()).get(0));
         }
         ArrayList<ElectionState> res = new ArrayList<>();
         res.add(new ElectionState(scores, getWinnersOfScoreVector(scores), votes));

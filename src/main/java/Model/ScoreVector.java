@@ -3,8 +3,9 @@ package Model;
 /**
  * Created by AriApar on 01/05/2016.
  */
-public class ScoreVector extends Vector{
+public class ScoreVector extends Vector {
     //ScoreVector should be used as a vector representing the vote count of each candidate, and nothing else.
+    //Its methods rely on this guarantee.
     public ScoreVector(int numCandidates) {
         super(numCandidates);
     }
@@ -23,12 +24,11 @@ public class ScoreVector extends Vector{
         return get(candidate-1);
     }
 
-    @Override
-    public ScoreVector add(Vector voteVector) {
-        assert (voteVector.getLength() == getLength());
+    public ScoreVector add(IVector voteIVector) {
+        assert (voteIVector.getLength() == getLength());
         int[] resArr = new int[getLength()];
         for (int i = 0; i < getLength(); i++) {
-            resArr[i] = get(i) + voteVector.get(i);
+            resArr[i] = get(i) + voteIVector.get(i);
         }
         return new ScoreVector(resArr);
     }
@@ -37,7 +37,6 @@ public class ScoreVector extends Vector{
     public ScoreVector cloneAndSet(int index, int value) {
         assert (index >= 0 && index < getLength());
         Vector rVector = super.cloneAndSet(index, value);
-
-        return new ScoreVector(rVector.getScores());
+        return new ScoreVector(rVector.getRepresentation());
     }
 }

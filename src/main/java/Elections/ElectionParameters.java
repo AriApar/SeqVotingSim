@@ -4,8 +4,6 @@ import Model.PreferenceList;
 import Model.VotingOrder;
 import Model.VotingRule;
 
-import java.util.ArrayList;
-
 /**
  * Created by AriApar on 12/01/2016.
  */

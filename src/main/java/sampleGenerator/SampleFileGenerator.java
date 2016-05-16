@@ -1,8 +1,5 @@
 package sampleGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by AriApar on 21/04/2016.
  */
@@ -18,6 +15,7 @@ public class SampleFileGenerator {
                 SampleFileWriter writer = new SampleFileWriter(voterValue,candValue,"res/PListSamples/");
                 for (int i = 0; i < instancePerConfig; i++){
                     writer.writeSampleFile(i);
+                    // wait a bit so random generator doesn't return same permutations.
                     Thread.sleep(5);
                 }
                 System.out.println("Voter size: " + voterValue + ", cand size: " + candValue + " complete.");

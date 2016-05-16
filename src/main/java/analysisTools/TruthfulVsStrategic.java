@@ -1,4 +1,4 @@
-package analysis_tools;
+package analysisTools;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Scanner;
 import java.util.regex.MatchResult;
 
@@ -27,12 +26,7 @@ public class TruthfulVsStrategic {
                         .listFiles(new FilenameFilter() {
                             @Override
                             public boolean accept(File dir, String name) {
-                                //int index = Collections.binarySearch(fileNames, name);
-                                //int size = fileNames.size();
-
                                 return (name.contains(candNo + "x" + noVoter + "Sample"));
-
-
                             }
                         });
 
@@ -41,17 +35,14 @@ public class TruthfulVsStrategic {
                 long diffVote = 0;
                 long votercount = 0;
                 for (int index = 0; index < strategicFiles.length; index++) {
-
                     File strategicFile = strategicFiles[index];
                     File truthfulFile = new File(Paths.get("truthful", "results", strategicFile.getName()).toString());
-
                     Path strategicFilePath = strategicFile.toPath();
                     Path truthfulFilePath = truthfulFile.toPath();
 
-                    //System.out.println(strategicFile.getName() + " vs " + truthfulFile);
                     if (Files.isRegularFile(strategicFilePath) && Files.isRegularFile(truthfulFilePath)) {
-                        //Integer voterNo = new Integer(fileName.substring(2, fileName.indexOf("S")));
-                        ArrayList<Integer> differingVoteCounts = countDifferingVotes(strategicFile, truthfulFile, noVoter);
+                        ArrayList<Integer> differingVoteCounts =
+                                countDifferingVotes(strategicFile, truthfulFile, noVoter);
                         ArrayList<Integer> absCount = readAbstentions(strategicFile);
                         for (int i = 0; i < differingVoteCounts.size(); i++) {
                             Integer differingVoteCount = differingVoteCounts.get(i);
@@ -62,7 +53,6 @@ public class TruthfulVsStrategic {
                     }
                 }
 
-
                 long overlapcount = votercount - diffVote;
                 System.out.println("Stats for candidate size " + candCount + ", voter size: " + noVoter);
                 System.out.println("Number of overlapping votes: " + overlapcount + " out of " + votercount);
@@ -72,7 +62,7 @@ public class TruthfulVsStrategic {
         }
     }
 
-    private static ArrayList<Integer> countDifferingVotes(File strategicFile, File truthfulFile, int noVoter) throws Exception {
+    private static ArrayList<Integer> countDifferingVotes(File strategicFile, File truthfulFile, int noVoter) {
         ArrayList<Integer> res = new ArrayList<>();
         try {
             Scanner inS = new Scanner(strategicFile);
@@ -87,8 +77,10 @@ public class TruthfulVsStrategic {
                     MatchResult resultStrategic = inS.match();
                     MatchResult resultTruthful = inT.match();
                     if (!resultStrategic.group(1).equals(resultTruthful.group(1)))
-                        throw new Exception("Voter IDs don't match");
-                    else if (!resultStrategic.group(2).equals("0") && !resultStrategic.group(2).equals(resultTruthful.group(2))) diffCount +=1;
+                        throw new RuntimeException("Voter IDs don't match, perhaps read the wrong file?");
+                    else if (!resultStrategic.group(2).equals("0")
+                            && !resultStrategic.group(2).equals(resultTruthful.group(2)))
+                        diffCount +=1;
                 }
                 res.add(diffCount);
                 inT.close();
@@ -100,21 +92,7 @@ public class TruthfulVsStrategic {
         return res;
     }
 
-    public static ArrayList<Integer> readAbstentions(File fileName) {
-        ArrayList<Integer> res = new ArrayList<>();
-        try {
-            Scanner in = new Scanner(fileName);
-            in.findInLine("This election has (\\d+) Nash equilibria!");
-            MatchResult result = in.match();
-            for (int i=1; i<=result.groupCount(); i++) {
-                in.findWithinHorizon("Abstentions: (\\d+)", 0);
-                result = in.match();
-                res.add(new Integer(result.group(i)));
-            }
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return res;
+    public static ArrayList<Integer> readAbstentions(File file) {
+        return ExpectedAbstention.readAbstentions(file);
     }
 }

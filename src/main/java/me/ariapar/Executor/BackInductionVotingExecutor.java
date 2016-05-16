@@ -39,10 +39,10 @@ public class BackInductionVotingExecutor {
                 .listFiles(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String name) {
-                        int index = Collections.binarySearch(fileNames, name);
-                        int size = fileNames.size();
+                        //int index = Collections.binarySearch(fileNames, name);
+                        //int size = fileNames.size();
 
-                        return name.contains("3x10S") || name.contains("2x10S"); //&& !(index >= 0 && index < size && fileNames.get(index).equals(name)) ;
+                        return name.contains("3x10S") || name.contains("2x10S");
                     }
                 });
 
@@ -69,7 +69,6 @@ public class BackInductionVotingExecutor {
         }
         catch (InterruptedException e){
             e.printStackTrace();
-            //threadPool.shutdownNow();
         }
     }
 }

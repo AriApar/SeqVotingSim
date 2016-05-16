@@ -1,10 +1,10 @@
 package sampleGenerator;
 
 import com.google.common.collect.Collections2;
-import com.google.common.primitives.Ints;
 
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by AriApar on 21/04/2016.
@@ -23,7 +23,6 @@ public class PermutationSampler {
 
     public List<Integer> getNextPermutation() {
         if (perms == null) initializePerms();
-        // now get the next permutation
         return perms.get(rand.nextInt(perms.size()));
     }
 
@@ -36,6 +35,4 @@ public class PermutationSampler {
         // generate the permutations
         perms = new ArrayList(Collections2.orderedPermutations(intList));
     }
-
-
 }

@@ -1,7 +1,6 @@
 package Elections;
 
 import Model.ScoreVector;
-import Model.Vector;
 import Model.Voter;
 
 import java.util.ArrayList;
@@ -42,14 +41,6 @@ public abstract class Election {
             voters.add(new Voter(voterId, params));
         }
         setVoters(voters);
-    }
-
-    public ArrayList<ArrayList<Integer>> getNEs(ArrayList<ScoreVector> scoress) {
-        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
-        for (ScoreVector score : scoress) {
-            res.add(getWinnersOfScoreVector(score));
-        }
-        return res;
     }
 
     public ArrayList<Integer> getWinnersOfScoreVector(ScoreVector scores) {

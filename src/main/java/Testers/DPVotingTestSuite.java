@@ -7,7 +7,6 @@ import Model.VotingRule;
 import VotingRules.PluralityVR;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +22,6 @@ public class DPVotingTestSuite extends AbstractTester {
 
     public static void main(String[] args) {
         try {
-
             File[] files = new File(Paths.get("res", "PListSamples").toString()).listFiles();
 
             Arrays.sort( files, new Comparator<File>() {
@@ -41,16 +39,8 @@ public class DPVotingTestSuite extends AbstractTester {
                     System.out.println("File " + filePath.getFileName().toString() + " done.");
                 }
             }
-            /*Files.walk(Paths.get("res", "PListSamples")).forEach(filePath -> {
-                //System.out.println(filePath.getFileName().toString());
-                if (Files.isRegularFile(filePath) && !filePath.getFileName().toString().equals(".DS_Store")) {
-                    runSampleFromPath(filePath, args);
-                    System.out.println("File " + filePath.getFileName().toString() + " done.");
-                }
-            });*/
             long lEndTime = System.currentTimeMillis();
             long difference = lEndTime - lStartTime;
-
             System.out.println("Elapsed milliseconds: " + difference);
         }
         catch (Exception e) {

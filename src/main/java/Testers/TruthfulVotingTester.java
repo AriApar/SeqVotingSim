@@ -1,10 +1,11 @@
 package Testers;
 
 import Elections.*;
-import Model.*;
+import Model.PreferenceList;
+import Model.VotingOrder;
+import Model.VotingRule;
 import VotingRules.PluralityVR;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -13,8 +14,6 @@ import java.util.Scanner;
  * Created by AriApar on 25/11/2015.
  */
 public class TruthfulVotingTester extends AbstractTester{
-
-
     public static void main(String[] args) throws Exception{
         try {
             Scanner in = new Scanner(getFile("SmallPListSample"));
@@ -37,12 +36,8 @@ public class TruthfulVotingTester extends AbstractTester{
             ArrayList<ElectionState> winners = e.findNE();
 
             printResults(order, winners);
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-
     }
-
 }

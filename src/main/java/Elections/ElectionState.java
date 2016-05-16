@@ -1,8 +1,6 @@
 package Elections;
 
 import Model.ScoreVector;
-import Model.Vector;
-
 import java.util.ArrayList;
 
 /**
@@ -53,7 +51,6 @@ public class ElectionState {
         if (currentWinners != null ? !currentWinners.equals(that.currentWinners) : that.currentWinners != null)
             return false;
         return currentVotes != null ? currentVotes.equals(that.currentVotes) : that.currentVotes == null;
-
     }
 
     @Override

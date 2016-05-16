@@ -3,7 +3,6 @@ package me.ariapar.Executor;
 import me.ariapar.Processor.SampleFileProcessor;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,12 +54,10 @@ public class TruthfulVotingExecutor {
             threadPool.awaitTermination(7L, TimeUnit.DAYS);
             long lEndTime = System.currentTimeMillis();
             long difference = lEndTime - lStartTime;
-
             System.out.println("Elapsed milliseconds: " + difference);
         }
         catch (InterruptedException e){
             e.printStackTrace();
-            //threadPool.shutdownNow();
         }
     }
 }

@@ -23,9 +23,10 @@ public class Preferences {
 
     public int length() { return alternatives; }
 
-    public int getPreferenceOfCandidate(int candidate) throws Exception {
+    public int getPreferenceOfCandidate(int candidate) {
         int index = find(candidate);
-        if (index == alternatives) throw new Exception("candidateID given to getPrefOfCand not in Preferences");
+        if (index == alternatives)
+            throw new RuntimeException("candidateID given to getPrefOfCand not in Preferences");
         return index + 1;
     }
 

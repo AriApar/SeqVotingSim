@@ -24,13 +24,12 @@ public class PreferenceList {
     public PreferenceList(int voters, int alternatives) {
         this.alternatives = alternatives;
         this.voters = voters;
-        preferenceList = new ArrayList<Preferences>(voters);
+        preferenceList = new ArrayList<>(voters);
     }
 
     public PreferenceList(int[][] prefList) {
         this.alternatives = prefList[0].length;
         this.voters = prefList.length;
-
         this.preferenceList = new ArrayList<>(voters);
         for (int i = 0; i<voters; i++) {
             preferenceList.add(new Preferences(prefList[i]));

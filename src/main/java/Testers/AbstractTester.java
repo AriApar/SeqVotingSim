@@ -19,9 +19,7 @@ import java.util.stream.IntStream;
 public class AbstractTester {
 
     public static File getFile(String fileName) {
-
         //Get file from resources folder
-
         File file = new File("res/PListExamples/" + fileName);
         return file;
     }
@@ -70,7 +68,6 @@ public class AbstractTester {
                 ElectionState wins = it.next();
                 //Print winners
                 ArrayList<Integer> elected = wins.getCurrentWinners();
-                //System.out.println(elected.toString());
 
                 for (int j = 0; j < elected.size() - 1; j++) writer.write(elected.get(j) + ", ");
                 writer.write(elected.get(elected.size() -1).toString());
@@ -97,6 +94,5 @@ public class AbstractTester {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }

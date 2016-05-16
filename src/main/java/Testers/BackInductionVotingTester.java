@@ -49,6 +49,4 @@ public class BackInductionVotingTester extends AbstractTester {
             e.printStackTrace();
         }
     }
-
-
 }

@@ -8,22 +8,21 @@ import java.util.ArrayList;
  */
 public class DPInfo implements Serializable {
     private ArrayList<Integer> winners;
-    private Vector prefE;
+    private IVector prefE;
 
     private int hashCode = 0;
 
-    public DPInfo(ArrayList<Integer> winners, Vector prefVector) {
+    public DPInfo(ArrayList<Integer> winners, IVector prefIVector) {
         this.winners = winners;
-        this.prefE = prefVector;
+        this.prefE = prefIVector;
         this.winners.trimToSize();
-        //hashCode();
     }
 
     public ArrayList<Integer> getWinners() {
         return winners;
     }
 
-    public Vector getE() {
+    public IVector getE() {
         return prefE;
     }
 
@@ -33,11 +32,8 @@ public class DPInfo implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         DPInfo dpInfo = (DPInfo) o;
-
-        //if (hashCode != dpInfo.hashCode()) return false;
         if (prefE != null ? prefE.equals(dpInfo.prefE) : dpInfo.prefE == null) return false;
         return winners != null ? !winners.equals(dpInfo.winners) : dpInfo.winners != null;
-
     }
 
     @Override

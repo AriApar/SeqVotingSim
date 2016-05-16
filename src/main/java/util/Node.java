@@ -54,7 +54,6 @@ public class Node<T> {
 
         if (data != null ? !data.equals(node.data) : node.data != null) return false;
         return children != null ? children.equals(node.children) : node.children == null;
-
     }
 
     @Override

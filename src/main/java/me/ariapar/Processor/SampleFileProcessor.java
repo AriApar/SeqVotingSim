@@ -63,7 +63,6 @@ public class SampleFileProcessor implements Runnable {
             ArrayList<ElectionState> winners = e.findNE();
             long endTime = System.nanoTime();
             saveResultsToFile(order, winners, (endTime - startTime), p, type);
-            e = null;
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(p.toString());
@@ -84,7 +83,7 @@ public class SampleFileProcessor implements Runnable {
                     break;
                 case DPWITHABS: directoryPath = "lazy_wo_cost/results";
                     break;
-                default: throw new Exception("invalid election type for saving results");
+                default: throw new RuntimeException("invalid election type for saving results");
             }
             File f = new File(directoryPath);
             f.mkdirs();
@@ -104,8 +103,6 @@ public class SampleFileProcessor implements Runnable {
                     ElectionState wins = it.next();
                     //Print winners
                     ArrayList<Integer> elected = wins.getCurrentWinners();
-                    //System.out.println(elected.toString());
-
                     for (int j = 0; j < elected.size() - 1; j++) writer.write(elected.get(j) + ", ");
                     writer.write(elected.get(elected.size() -1).toString());
                     writer.newLine();
@@ -123,10 +120,8 @@ public class SampleFileProcessor implements Runnable {
                         writer.write("Voter " + v + ": Candidate " +  iter.next());
                         writer.newLine();
                     }
-
                 }
                 writer.write("Time taken: " + time + " nanoseconds");
-
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -136,7 +131,7 @@ public class SampleFileProcessor implements Runnable {
                     writer.close();
                     System.out.println("File " + path.getFileName().toString() + " done, " + args[0]);
                 } catch (IOException ex) {
-                    // Log error writing file and bail out.
+                    // Log error writing file and exit.
                     ex.printStackTrace();
                 }
             }
